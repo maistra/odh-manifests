@@ -16,7 +16,7 @@ configMapGenerator:
   - name: config
     behavior: merge
     literals:
-      - USE_ISTIO=false
+      - USE_ISTIO=true
       - ADD_FSGROUP=false
 patchesStrategicMerge:
   - remove_namespace_patch.yaml
