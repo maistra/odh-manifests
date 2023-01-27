@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ext-service
+  namespace: ext-auth
+spec:
+  gateways:
+  - auth-gateway
+  hosts:
+  - "*"
+  http:
+  - route:
+    - destination:
+        host: proxy
+        port:
+          number: 80
