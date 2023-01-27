@@ -13,7 +13,6 @@ resources:
 - deployment.yaml
 - fetch-builds-and-images.rbac.yaml
 - image-puller.clusterrolebinding.yaml
-- oauth.secret.yaml
 - role-binding.yaml
 - role.yaml
 - routes.yaml
