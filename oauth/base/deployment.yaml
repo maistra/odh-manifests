@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: proxy
-  namespace: ext-auth
+  name: auth-service
+  namespace: auth-provider
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: proxy
+      app: auth-service
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: proxy
+        app: auth-service
     spec:
-      serviceAccountName: ext-auth
+      serviceAccount: auth-service
       containers:
       - name: oauth-proxy
-        image: quay.io/openshift/origin-oauth-proxy:latest
+        image: oauth-proxy
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8180
@@ -26,27 +26,21 @@ spec:
         args:
         - --http-address=:8180
         - --provider=openshift
-        - --openshift-service-account=ext-auth
-        # - --client-id=dashboard-oauth-client  # using ^ SA as client 
-        # - --client-secret-file=/etc/oauth/client/secret
+        # using ^ SA as client as oauth client
+        - --openshift-service-account=auth-service
         - --upstream=http://localhost:5678
+        - --cookie-expire=23h0m0s
+        - --cookie-secret-file=/etc/cookie/secret
+        - --pass-access-token
         - --tls-cert=/etc/tls/private/tls.crt
         - --tls-key=/etc/tls/private/tls.key
-        - --cookie-secret-file=/etc/oauth/config/cookie_secret
-        - --cookie-expire=23h0m0s
-        - --cookie-secret=SECRET
-        - --pass-access-token
-        - --pass-user-bearer-token 
-        # - --scope=user:full  # from odh-dash deployment, unsure if necessary.
         volumeMounts:
-        - mountPath: /etc/tls/private
-          name: proxy-tls
-        - mountPath: /etc/oauth/config
-          name: oauth-config
-        - mountPath: /etc/oauth/client
-          name: oauth-client
+          - name: tls
+            mountPath: /etc/tls/private
+          - name: cookie
+            mountPath: /etc/cookie            
       - name: http-https-echo
-        image: quay.io/bmajsak/http-https-echo:token
+        image: http-https-echo
         imagePullPolicy: IfNotPresent
         ports:
           - name: echo-port
@@ -57,13 +51,9 @@ spec:
           - name: "HTTPS_PORT"
             value: "9999"
       volumes:
-        - name: proxy-tls
+        - name: tls
           secret:
-            secretName: proxy-tls
-        - name: oauth-config
+            secretName: self-signed-cert
+        - name: cookie
           secret:
-            secretName: oauth-config-generated
-        - name: oauth-client
-          secret:
-            secretName: dashboard-oauth-client-generated
-      
+            secretName: cookie

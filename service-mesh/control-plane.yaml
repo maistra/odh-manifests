@@ -6,9 +6,6 @@ metadata:
 spec:
   version: v2.3
   proxy:
-    accessLogging:
-      file:
-        name: /dev/stdout 
     injection:
       autoInject: true
     runtime:
@@ -32,14 +29,3 @@ spec:
     kiali:
       enabled: true
       name: kiali
-  techPreview:
-    meshConfig:
-      extensionProviders:
-        - name: proxy
-          envoyExtAuthzHttp:
-            service: proxy.ext-auth.svc.cluster.local
-            port: 80
-            timeout: 1.5s
-            includeHeadersInCheck: ["authorization", "cookie"]
-            headersToUpstreamOnAllow: ["x-forwarded-access-token", "authorization", "path", "x-auth-request-user", "x-auth-request-email", "x-auth-request-access-token"]
-            headersToDownstreamOnDeny: ["content-type", "set-cookie"]
