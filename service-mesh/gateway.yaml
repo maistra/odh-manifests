@@ -13,6 +13,6 @@ spec:
      protocol: HTTPS
    tls:
      mode: SIMPLE
-     credentialName: odh-dashboard-credential 
+     credentialName: odh-dashboard-cert
    hosts:
    - "*"

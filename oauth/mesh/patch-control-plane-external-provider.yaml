@@ -1,0 +1,28 @@
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+  namespace: istio-system
+spec:
+  techPreview:
+    meshConfig:
+      extensionProviders:
+        - name: external-auth-provider
+          envoyExtAuthzHttp:
+            # TODO rethink service-name.namespace
+            service: auth-service.auth-provider.svc.cluster.local
+            port: 80
+            timeout: 1.5s
+            includeHeadersInCheck: 
+              - "authorization"
+              - "cookie"
+            headersToUpstreamOnAllow: 
+              - "x-forwarded-access-token"
+              - "authorization"
+              - "path"
+              - "x-auth-request-user"
+              - "x-auth-request-email"
+              - "x-auth-request-access-token"
+            headersToDownstreamOnDeny: 
+              - "content-type"
+              - "set-cookie"

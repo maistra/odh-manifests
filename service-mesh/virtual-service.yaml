@@ -8,9 +8,6 @@ spec:
  hosts:
  - "*"  
  http:
- - match:
-  #  - uri:
-  #      prefix: /odh-dashboard
    route:           
    - destination:
        host: odh-dashboard
