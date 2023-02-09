@@ -4,6 +4,7 @@ namespace: auth-provider
 resources:
 - secrets.yaml
 - service-account.yaml
+- routes.yaml
 - deployment.yaml
 - service.yaml
 images:
