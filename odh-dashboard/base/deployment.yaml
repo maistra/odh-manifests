@@ -10,6 +10,7 @@ spec:
   template:
     metadata:
       labels:
+        sidecar.istio.io/inject: "true"
         deployment: odh-dashboard
     spec:
       affinity:
