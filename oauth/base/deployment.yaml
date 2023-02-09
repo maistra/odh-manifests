@@ -10,10 +10,9 @@ spec:
       app: auth-service
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
       labels:
         app: auth-service
+        sidecar.istio.io/inject: "true"
     spec:
       serviceAccount: auth-service
       containers:
