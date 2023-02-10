@@ -1,0 +1,17 @@
+kind: AuthorizationPolicy
+apiVersion: security.istio.io/v1beta1
+metadata:
+  name: odh-auth-policy
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
+  action: CUSTOM
+  provider:
+    name: external-odh-auth-provider
+  rules:
+  - to:
+    - operation:
+        # hosts: ["odh-dashboard.opendatahub.svc.cluster.local"] # todo: add more?
+        notPaths: ["/auth/*", "/metrics/*"] # todo: see if this is necessary
