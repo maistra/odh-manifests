@@ -2,7 +2,8 @@ kind: OAuthClient
 apiVersion: oauth.openshift.io/v1
 metadata:
   name: oauth-proxy-client
-secret: "bXktbGl0dGxlLW9hdXRoLXByb3h5LXNlY3JldAo"
+# FIXME change to actual secret
+secret: "bXktbGl0dGxlLW9hdXRoLXByb3h5LXNlY3JldAo" # gitleaks:allow
 redirectURIs:
 # TODO for now his needs to be adjusted based on your cluster settings
 - "https://opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing/oauth/callback"
