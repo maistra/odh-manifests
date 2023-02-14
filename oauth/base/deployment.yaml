@@ -25,14 +25,16 @@ spec:
         args:
         - --http-address=:8180
         - --provider=openshift
-        # using ^ SA as client as oauth client
-        - --openshift-service-account=auth-service
         - --upstream=http://localhost:5678
         - --cookie-expire=23h0m0s
+        - --cookie-secure=true
         - --cookie-secret-file=/etc/cookie/secret
         - --pass-access-token
         - --tls-cert=/etc/tls/private/tls.crt
         - --tls-key=/etc/tls/private/tls.key
+        - --scope=user:full
+        - --client-id=oauth-proxy-client
+        - --client-secret=bXktbGl0dGxlLW9hdXRoLXByb3h5LXNlY3JldAo
         volumeMounts:
           - name: tls
             mountPath: /etc/tls/private
