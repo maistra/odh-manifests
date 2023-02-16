@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: auth-service
   namespace: auth-provider
+  labels:
+    app: auth-service
 spec:
   replicas: 1
   selector:
