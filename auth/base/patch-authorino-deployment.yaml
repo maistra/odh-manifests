@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:  
+  name: authorino
+  namespace: auth-provider
+spec:  
+  template:
+    metadata:
+      labels:
+        app: auth-service
+        sidecar.istio.io/inject: "true"

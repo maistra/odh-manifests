@@ -45,7 +45,9 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
     sourceNamespace: openshift-marketplace
   EOF"    
   }
-
+  ```
+  
+  ```sh
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
@@ -57,7 +59,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 ## Install Openshift Service Mesh Control Plane
 
 ```sh
-kustomize build service-mesh | kubectl apply -f -
+kustomize build service-mesh | kubectl apply -f - 
 ```
 
 ## Setting up Authorizantion Service
@@ -69,7 +71,7 @@ kustomize build auth/cluster | kubectl apply -f -
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
 
 ```sh
- kubectl get pods -n auth-provider -o yaml | grep -q istio-proxy || kubectl rollout restart deployment --selector=app=auth-service -n auth-provider  
+ kubectl get pods -n auth-provider -o yaml | grep -q istio-proxy || kubectl t rollout restart deployment authorino -n auth-provider
 ```
 
 Register external authz provider in Service Mesh
