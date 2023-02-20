@@ -6,6 +6,8 @@
 * CLI tools
   * `kustomize` v5.0.0+
   * `kubectl`
+  * `envsubst`
+  * `yq`
 
 * Installed operators
   * Kiali
@@ -16,7 +18,7 @@
 ### Check if required operators are installed
 
 ```sh
-kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /opendatahub/ {exit 0} {exit 1}' || echo "Please install all required operators."
+kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /opendatahub/ && /authorino/ {exit 0} {exit 1}' || echo "Please install all required operators."
 ```
 
 <details>
@@ -51,7 +53,8 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
-  createSubscription "opendatahub-operator" "community-operators"
+  createSubscription "opendatahub-operator" "community-operators"q
+  createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
 </details>
@@ -62,25 +65,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 kustomize build service-mesh | kubectl apply -f - 
 ```
 
-## Setting up Authorizantion Service
-
-```sh
-kustomize build auth/cluster | kubectl apply -f -
-```
-
-Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
-
-```sh
- kubectl get pods -n auth-provider -o yaml | grep -q istio-proxy || kubectl t rollout restart deployment authorino -n auth-provider
-```
-
-Register external authz provider in Service Mesh
-
-```sh
-kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-external-provider.yaml --type=merge
-```
-
-## Setting up Opendatahub Project
+## Setting up Open Data Hub Project
 
 ### Create Kubeflow Definition
 
@@ -127,18 +112,56 @@ alias kfdef="FORK=$(git remote get-url fork | cut -d':' -f 2 | cut -d'.' -f 1 | 
 
 ### Deployment
 
+Let's start with the namespace
+
 ```sh
-kubectl create ns opendatahub
+export ODH_NS=opendatahub
+kubectl create ns $ODH_NS
 ```
 
-First, add project to Service Mesh and set-up routing.
+to add the project to Service Mesh and set up the routing:
 
 ```sh
 kustomize build odh-dashboard/overlays/service-mesh | kubectl apply -f -
 ```
 
-Then create ODH setup
+and finally to create ODH project:
 
 ```sh
-kubectl apply -n opendatahub -f - < <(kfdef)  
+kubectl apply -n $ODH_NS -f - < <(kfdef)  
+```
+
+## Setting up Authorizantion Service
+
+```sh
+export CLIENT_SECRET=$(openssl rand -base64 32)
+export CLIENT_HMAC=$(openssl rand -base64 32)
+export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
+export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
+kustomize build auth/cluster | envsubst | kubectl apply -f - 
+```
+
+Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
+
+```sh
+export AUTH_NS=auth-provider
+kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl t rollout restart deployment authorino -n $AUTH_NS
+```
+
+Mount OAuth2 secrets to Istio gateways
+
+```sh
+kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
+```
+
+You can validate if the secrets are mounted by executing:
+
+```sh
+kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls /etc/istio/odh-oauth2
+```
+
+Register external authz provider in Service Mesh
+
+```sh
+kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-external-provider.yaml --type=merge
 ```
