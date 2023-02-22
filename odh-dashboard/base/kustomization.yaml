@@ -24,8 +24,8 @@ resources:
 - model-serving-role-binding.yaml
 images:
 - name: odh-dashboard
-  newName: quay.io/opendatahub/odh-dashboard
-  newTag: v2.9.2
+  newName: quay.io/maistra-dev/odh-dashboard
+  newTag: maistra-dev
 - name: oauth-proxy
   newName: registry.redhat.io/openshift4/ose-oauth-proxy
   newTag: v4.8
