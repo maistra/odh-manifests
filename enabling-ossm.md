@@ -13,12 +13,12 @@
   * OSSM
   * OpenData Hub
   
-
-#### Check if required operators are installed
+### Check if required operators are installed
 
 ```sh
 kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /opendatahub/ {exit 0} {exit 1}' || echo "Please install all required operators."
 ```
+
 <details>
   <summary>
     Install required operators
@@ -49,10 +49,10 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
-  createSubscription "opendatahub-operator" "community-operators" "alpha"
-```
-</details>
+  createSubscription "opendatahub-operator" "community-operators"
+  ```
 
+</details>
 
 ## Install Openshift Service Mesh Control Plane
 
