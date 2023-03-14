@@ -9,7 +9,7 @@ spec:
       app: istio-ingressgateway
   action: CUSTOM
   provider:
-    name: external-odh-auth-provider-http
+    name: odh-auth-provider
   rules:
 
   - to:
