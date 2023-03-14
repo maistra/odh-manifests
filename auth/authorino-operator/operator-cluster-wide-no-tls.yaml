@@ -3,7 +3,7 @@ kind: Authorino
 metadata:
   name: authorino
 spec:
-  replicas: 1
+  authConfigLabelSelectors: authorino/topic=odh
   clusterWide: true
   listener:
     tls:

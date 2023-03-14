@@ -2,6 +2,8 @@ apiVersion: authorino.kuadrant.io/v1beta1
 kind: AuthConfig
 metadata:
   name: odh-dashboard-protection
+  labels:
+    authorino/topic: odh
 spec:
   hosts:
   # TODO add more hosts
@@ -13,18 +15,17 @@ spec:
     kubernetes:
       audiences: 
       - "https://kubernetes.default.svc"
-  # authorization:
-  # - name: k8s-rbac
-  #   kubernetes:
-  #     user:
-  #       valueFrom: { authJSON: auth.identity.sub }
   authorization:
-  - name: check-openshift-group
-    json:
-      rules:
-      - selector: auth.identity.groups
-        operator: incl
-        value: odh-dashboard
+  - name: k8s-rbac
+    kubernetes:
+      user:
+        valueFrom: { authJSON: auth.identity.sub }
+  # - name: check-openshift-group
+  #   json:
+  #     rules:
+  #     - selector: auth.identity.groups
+  #       operator: incl
+  #       value: odh-dashboard
   response:
   - name: x-auth-data
     json:
