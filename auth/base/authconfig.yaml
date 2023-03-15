@@ -3,7 +3,7 @@ kind: AuthConfig
 metadata:
   name: odh-dashboard-protection
   labels:
-    authorino/topic: odh
+    authorino/topic: istio
 spec:
   hosts:
   # TODO add more hosts
@@ -32,3 +32,15 @@ spec:
       properties:
       - name: username
         valueFrom: { authJSON: auth.identity.username }
+  denyWith:
+      unauthorized:
+        message:
+          value: "Sorry, but no, sorry!"
+      # TODO needs better OAauth/redirect understanding on my end if it would work at all...
+      unauthenticated:
+        code: 302
+        headers:
+        - name: Location
+          value: https://oauth-openshift.apps-crc.testing/oauth/authorize?client_id=odh&redirect_uri=https%3A%2F%2Fopendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing%2Foauth%2Fcallback&response_type=token&scope=user%3Afull
+        - name: x-auth-pipeline
+          value: authorino-odh-dashboard-protectioncrc
