@@ -2,10 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 sortOptions:
   order: fifo # otherwise ServiceMeshMember will be created after the deployment and thus istio will not inject sidecar proxy
-namespace: auth-provider
 resources:
 - namespace.yaml
 - ../mesh
 - ../base
-- ../rbac
+- ../rbac # TODO review
 

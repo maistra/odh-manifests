@@ -53,7 +53,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
-  createSubscription "opendatahub-operator" "community-operators"q
+  createSubscription "opendatahub-operator" "community-operators"
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 

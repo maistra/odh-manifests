@@ -3,29 +3,20 @@ kind: AuthConfig
 metadata:
   name: odh-dashboard-protection
   labels:
-    authorino/topic: istio
+    authorino/topic: odh
 spec:
   hosts:
-  # TODO add more hosts
-  # TODO how to make it dynamic?
-  # - opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing
-  - opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing
+  - "${ODH_ROUTE}"
   identity:
-  - name: service-accounts
+  - name: authorized-service-accounts
     kubernetes:
       audiences: 
-      - "https://kubernetes.default.svc"
+      - "https://kubernetes.default.svc" # TODO create an odh group instead?
   authorization:
   - name: k8s-rbac
     kubernetes:
       user:
-        valueFrom: { authJSON: auth.identity.sub }
-  # - name: check-openshift-group
-  #   json:
-  #     rules:
-  #     - selector: auth.identity.groups
-  #       operator: incl
-  #       value: odh-dashboard
+        valueFrom: { authJSON: auth.identity.username }
   response:
   - name: x-auth-data
     json:
@@ -33,14 +24,7 @@ spec:
       - name: username
         valueFrom: { authJSON: auth.identity.username }
   denyWith:
-      unauthorized:
-        message:
-          value: "Sorry, but no, sorry!"
-      # TODO needs better OAauth/redirect understanding on my end if it would work at all...
-      unauthenticated:
-        code: 302
-        headers:
-        - name: Location
-          value: https://oauth-openshift.apps-crc.testing/oauth/authorize?client_id=odh&redirect_uri=https%3A%2F%2Fopendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing%2Foauth%2Fcallback&response_type=token&scope=user%3Afull
-        - name: x-auth-pipeline
-          value: authorino-odh-dashboard-protectioncrc
+    unauthorized:
+      message:
+        value: "Authorino denied"
+

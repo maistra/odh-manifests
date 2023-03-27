@@ -2,7 +2,9 @@ apiVersion: operator.authorino.kuadrant.io/v1beta1
 kind: Authorino
 metadata:
   name: authorino
+  namespace: auth-provider
 spec:
+  image: quay.io/bmajsak/authorino:dev
   authConfigLabelSelectors: authorino/topic=odh
   clusterWide: true
   listener:

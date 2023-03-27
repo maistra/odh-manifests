@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: auth-provider
 resources:
-- service-account.yaml
-- oauth-client.yaml
-- service.yaml
+- operator-cluster-wide-no-tls.yaml
+- authconfig.yaml
+
