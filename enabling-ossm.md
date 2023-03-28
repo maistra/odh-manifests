@@ -146,7 +146,7 @@ export CLIENT_SECRET=$(openssl rand -base64 32)
 export CLIENT_HMAC=$(openssl rand -base64 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
-endopoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://openshift.default.svc/.well-known/oauth-authorization-server -sS -k)
+endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://openshift.default.svc/.well-known/oauth-authorization-server -sS -k)
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
 kustomize build auth/cluster | envsubst | kubectl apply -f - 
