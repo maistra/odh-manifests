@@ -134,6 +134,7 @@ kubectl apply -n $ODH_NS -f - < <(kfdef)
 ## Setting up Authorizantion Service
 
 ```sh
+export AUTH_NS=auth-provider
 export CLIENT_SECRET=$(openssl rand -base64 32)
 export CLIENT_HMAC=$(openssl rand -base64 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
@@ -144,7 +145,6 @@ kustomize build auth/cluster | envsubst | kubectl apply -f -
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
 
 ```sh
-export AUTH_NS=auth-provider
 kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl t rollout restart deployment authorino -n $AUTH_NS
 ```
 

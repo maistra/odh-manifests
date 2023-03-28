@@ -4,5 +4,5 @@ metadata:
  name: odh
 secret: "${CLIENT_SECRET}"
 redirectURIs:
-- "${ODH_ROUTE}"
+- "https://${ODH_ROUTE}"
 grantMethod: prompt
