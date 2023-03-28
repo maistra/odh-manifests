@@ -63,8 +63,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 ## Install Openshift Service Mesh Control Plane
 
 ```sh
-sleep 4 # to prevent kubectl wait from failing
-kubectl wait --for condition=established crd/servicemeshcontrolplanes.maistra.io --timeout 300s
+until kubectl get crd servicemeshcontrolplanes.maistra.io  >/dev/null 2>&1; do  echo 'Waiting for smcp CRD to appear...'; sleep 1; done
 kustomize build service-mesh | kubectl apply -f -
 sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
@@ -134,8 +133,14 @@ and finally to create ODH project:
 
 ```sh
 kubectl apply -n $ODH_NS -f - < <(kfdef)  
-sleep 4 # to prevent kubectl wait from failing
+until kubectl get deployments -n $ODH_NS  >/dev/null 2>&1; do  echo 'Waiting for ODH deployments to appear...'; sleep 1; done
 kubectl wait --for condition=available deployment --all --timeout 360s -n $ODH_NS
+```
+
+Check if Istio proxy is deployed. Trigger restart of all deployments if that's not the case.
+
+```sh
+kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
 ## Setting up Authorizantion Service
@@ -150,7 +155,7 @@ endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q -
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
 kustomize build auth/cluster | envsubst | kubectl apply -f - 
-sleep 4 # to prevent kubectl wait from failing
+until kubectl get deployments -n $AUTH_NS  >/dev/null 2>&1; do  echo 'Waiting for AUTH_NS deployments to appear...'; sleep 1; done
 kubectl wait --for condition=available deployment --all --timeout 360s -n $AUTH_NS
 ```
 
@@ -191,5 +196,23 @@ xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &
 
 If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I seen:
 
+```sh
+kubectl logs $(kubectl get pod -l app=oauth-openshift -n openshift-authentication -o name) -n openshift-authentication  
+```
+
 * wrong redirect URL
-* mismatching secret between what OAuth client has defined and what is stored in the ConfigMap (that yields an error of unauthenticated client)
+* mismatching secret between what OAuth client has defined and what is stored in the ConfigMap (that yields an error of unauthenticated client `E0328 18:39:56.277217       1 access.go:177] osin: error=unauthorized_client, internal_error=<nil> get_client=client check failed, client_id=odh`)
+
+In case of the latter check if the token is the same everywhere, but comparing output of the following commands:
+
+```sh
+kubectl get oauthclient.oauth.openshift.io odh
+kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- cat /etc/istio/odh-oauth2/token-secret.yaml
+kubectl get configmap istio-odh-oauth2 -n istio-system -o yaml
+```
+
+It might be that ingressgateway pod is out of sync, so restarting it might help:
+
+```sh
+kubectl rollout restart deployment -n istio-system istio-ingressgateway  
+```
