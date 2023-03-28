@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
 - operator-cluster-wide-no-tls.yaml
 - authconfig.yaml
-
