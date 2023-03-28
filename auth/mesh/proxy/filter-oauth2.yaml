@@ -56,9 +56,9 @@ spec:
          config:
           token_endpoint:
             cluster: oauth-openshift
-            uri:  https://${OAUTH_ROUTE}/oauth/token # $(echo $endpoint | jq .token_endpoint)
+            uri:  ${TOKEN_ENDPOINT}
             timeout: 3s
-          authorization_endpoint: https://${OAUTH_ROUTE}/oauth/authorize # $(echo $endpoint | jq .authorization_endpoint)
+          authorization_endpoint: ${AUTH_ENDPOINT}
           redirect_uri: "https://%REQ(:authority)%/callback"
           redirect_path_matcher:
             path:
