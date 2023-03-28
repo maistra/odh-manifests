@@ -135,7 +135,7 @@ and finally to create ODH project:
 ```sh
 kubectl apply -n $ODH_NS -f - < <(kfdef)  
 sleep 4 # to prevent kubectl wait from failing
-kubectl wait --for condition=available deployment --all --timeout 300s -n $ODH_NS
+kubectl wait --for condition=available deployment --all --timeout 360s -n $ODH_NS
 ```
 
 ## Setting up Authorizantion Service
@@ -146,12 +146,12 @@ export CLIENT_SECRET=$(openssl rand -base64 32)
 export CLIENT_HMAC=$(openssl rand -base64 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
-endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://openshift.default.svc/.well-known/oauth-authorization-server -sS -k)
+endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
 kustomize build auth/cluster | envsubst | kubectl apply -f - 
 sleep 4 # to prevent kubectl wait from failing
-kubectl wait --for condition=available deployment --all --timeout 300s -n $AUTH_NS
+kubectl wait --for condition=available deployment --all --timeout 360s -n $AUTH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
