@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-* Openshift cluster with enough karma
+* Openshift cluster with enough karma (make sure to log in :))
 * CLI tools
   * `kustomize` v5.0.0+
   * `kubectl`
@@ -14,6 +14,7 @@
   * Jaeger
   * OSSM
   * OpenData Hub
+  * Authorino
   
 ### Check if required operators are installed
 
@@ -62,7 +63,9 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 ## Install Openshift Service Mesh Control Plane
 
 ```sh
-kustomize build service-mesh | kubectl apply -f - 
+kubectl wait --for condition=established crd/servicemeshcontrolplanes.maistra.io --timeout 300s
+kustomize build service-mesh | kubectl apply -f -
+kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
 ```
 
 ## Setting up Open Data Hub Project
@@ -104,7 +107,7 @@ spec:
 EOF
 ```
 
-For convenience, we can create an alias.
+For convenience, we can create an alias (but you have to have `git remote` named `fork` to make it working):
 
 ```sh
 alias kfdef="FORK=$(git remote get-url fork | cut -d':' -f 2 | cut -d'.' -f 1 | uniq | tail -n 1 | cut -d'/' -f 1) CURRENT_BRANCH=$(git symbolic-ref --short HEAD) envsubst < odh-minimal.yaml"
@@ -129,6 +132,7 @@ and finally to create ODH project:
 
 ```sh
 kubectl apply -n $ODH_NS -f - < <(kfdef)  
+kubectl wait --for condition=available deployment --all --timeout 300s -n $ODH_NS
 ```
 
 ## Setting up Authorizantion Service
@@ -140,12 +144,13 @@ export CLIENT_HMAC=$(openssl rand -base64 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
 kustomize build auth/cluster | envsubst | kubectl apply -f - 
+kubectl wait --for condition=available deployment --all --timeout 300s -n $AUTH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
 
 ```sh
-kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl t rollout restart deployment authorino -n $AUTH_NS
+kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl rollout restart deployment authorino -n $AUTH_NS
 ```
 
 Mount OAuth2 secrets to Istio gateways
@@ -157,11 +162,26 @@ kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-pl
 You can validate if the secrets are mounted by executing:
 
 ```sh
-kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls /etc/istio/odh-oauth2
+kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls -al /etc/istio/odh-oauth2
 ```
 
-Register external authz provider in Service Mesh
+Register [external authz provider](https://istio.io/latest/docs/tasks/security/authorization/authz-custom/) in Service Mesh:
 
 ```sh
 kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-external-provider.yaml --type=merge
 ```
+
+Now you can open Open Data Hub dashboard in the browser:
+
+```sh
+xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &    
+```
+
+## Troubleshooting
+
+### `OAuth flow failed`
+
+If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I seen:
+
+* wrong redirect URL
+* mismatching secret between what OAuth client has defined and what is stored in the ConfigMap (that yields an error of unauthenticated client)
