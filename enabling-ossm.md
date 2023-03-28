@@ -63,8 +63,10 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 ## Install Openshift Service Mesh Control Plane
 
 ```sh
+sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=established crd/servicemeshcontrolplanes.maistra.io --timeout 300s
 kustomize build service-mesh | kubectl apply -f -
+sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
 ```
 
@@ -132,6 +134,7 @@ and finally to create ODH project:
 
 ```sh
 kubectl apply -n $ODH_NS -f - < <(kfdef)  
+sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=available deployment --all --timeout 300s -n $ODH_NS
 ```
 
@@ -144,6 +147,7 @@ export CLIENT_HMAC=$(openssl rand -base64 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
 kustomize build auth/cluster | envsubst | kubectl apply -f - 
+sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=available deployment --all --timeout 300s -n $AUTH_NS
 ```
 
@@ -159,9 +163,10 @@ Mount OAuth2 secrets to Istio gateways
 kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
 ```
 
-You can validate if the secrets are mounted by executing:
+You can validate if the secrets are mounted by executing (it might take some time for pod to show up with updated config):
 
 ```sh
+kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
 kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls -al /etc/istio/odh-oauth2
 ```
 
