@@ -7,6 +7,7 @@
   * `kustomize` v5.0.0+
   * `kubectl`
   * `envsubst`
+  * `openssl`
   * `jq` and `yq`
 
 * Installed operators
