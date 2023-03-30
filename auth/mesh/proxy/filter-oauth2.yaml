@@ -78,4 +78,4 @@ spec:
                 path: "/etc/istio/odh-oauth2/hmac-secret.yaml"
           auth_scopes:
             - user:full
-          forward_bearer_token: true
+          forward_bearer_token: true 
