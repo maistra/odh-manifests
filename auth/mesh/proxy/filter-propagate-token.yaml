@@ -10,7 +10,7 @@ spec:
   workloadSelector:
     labels:
       istio: ingressgateway
-  priority: 2 # after oauth2 filter
+  priority: 20 # after oauth2 filter
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -34,6 +34,8 @@ spec:
 
               local bearer_token = nil
               local cookies = headers:get("cookie")
+              -- Extracting token value from the header which is in form of 
+              -- cookie: OauthHMAC=HMAC_VALUE;OauthExpires=1679994106; BearerToken=TOKEN_VALUE`
               if cookies then
                 for cookie in cookies:gmatch("([^;]+)") do
                   local name, value = cookie:match("^%s*([^=]+)=(.*)$")
