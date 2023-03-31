@@ -70,3 +70,17 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - maistra.io
+  resources:
+  - servicemeshmembers
+  - servicemeshcontrolplanes
+  - servicemeshmemberroles
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - use
