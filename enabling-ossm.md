@@ -79,7 +79,7 @@ kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
 ### Create Kubeflow Definition
 
 ```sh
-cat <<'EOF' > odh-minimal.yaml
+cat <<'EOF' > odh-minimal.ign.yaml
 apiVersion: kfdef.apps.kubeflow.org/v1
 kind: KfDef
 metadata:
@@ -125,7 +125,7 @@ EOF
 For convenience, we can create an alias (but you have to have `git remote` named `fork` to make it working):
 
 ```sh
-alias kfdef="FORK=$(git remote get-url fork | cut -d':' -f 2 | cut -d'.' -f 1 | uniq | tail -n 1 | cut -d'/' -f 1) CURRENT_BRANCH=$(git symbolic-ref --short HEAD) envsubst < odh-minimal.yaml"
+alias kfdef="FORK=$(git remote get-url fork | cut -d':' -f 2 | cut -d'.' -f 1 | uniq | tail -n 1 | cut -d'/' -f 1) CURRENT_BRANCH=$(git symbolic-ref --short HEAD) envsubst < odh-minimal.ign.yaml"
 ```
 
 ### Deployment
