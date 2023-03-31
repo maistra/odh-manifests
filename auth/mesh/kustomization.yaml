@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - smm.yaml
-- gateway.yaml
-- virtual-service.yaml
+- oauth-configmap.yaml
+- oauth-client.yaml
+- proxy/filter-oauth2.yaml
+- proxy/filter-propagate-token.yaml
 

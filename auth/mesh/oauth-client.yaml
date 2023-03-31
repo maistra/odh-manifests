@@ -1,0 +1,8 @@
+kind: OAuthClient           
+apiVersion: oauth.openshift.io/v1
+metadata:
+ name: odh
+secret: "${CLIENT_SECRET}"
+redirectURIs:
+- "https://${ODH_ROUTE}"
+grantMethod: prompt

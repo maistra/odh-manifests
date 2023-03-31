@@ -2,6 +2,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: auth-service
+  namespace: $AUTH_NS
 subjects:
   - kind: ServiceAccount
     name: auth-service

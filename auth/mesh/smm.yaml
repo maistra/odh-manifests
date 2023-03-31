@@ -2,7 +2,7 @@ apiVersion: maistra.io/v1
 kind: ServiceMeshMember
 metadata:
   name: default
-  namespace: auth-provider
+  namespace: $AUTH_NS
 spec:
   controlPlaneRef:
     namespace: istio-system
