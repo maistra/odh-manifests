@@ -1,0 +1,31 @@
+apiVersion: authorino.kuadrant.io/v1beta1
+kind: AuthConfig
+metadata:
+  name: odh-dashboard-protection
+  namespace: $ODH_NS
+  labels:
+    authorino/topic: odh
+spec:
+  hosts:
+  - "${ODH_ROUTE}"
+  identity:
+  - name: authorized-service-accounts
+    kubernetes:
+      audiences: 
+      - "https://kubernetes.default.svc" # TODO create an odh group instead?
+  authorization:
+  - name: k8s-rbac
+    kubernetes:
+      user:
+        valueFrom: { authJSON: auth.identity.username }
+  response:
+  - name: x-auth-data
+    json:
+      properties:
+      - name: username
+        valueFrom: { authJSON: auth.identity.username }
+  denyWith:
+    unauthorized:
+      message:
+        value: "Authorino denied"
+
