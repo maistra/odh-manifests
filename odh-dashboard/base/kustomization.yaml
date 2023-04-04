@@ -25,5 +25,4 @@ resources:
 images:
 - name: odh-dashboard
   newName: quay.io/maistra-dev/odh-dashboard
-  newTag: ds-proj-routing
-
+  newTag: enable_ossm_routing
