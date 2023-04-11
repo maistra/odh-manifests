@@ -65,7 +65,7 @@ spec:
               exact: /callback
           signout_path:
             path:
-              exact: /logout
+              exact: /oauth/sign_out
           credentials:
             client_id: odh
             token_secret:
