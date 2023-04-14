@@ -9,6 +9,7 @@
   * `envsubst`
   * `openssl`
   * `jq` and `yq`
+  * (until operator changes are merged) `operator-sdk` v1.24.1
 
 * Installed operators
   * Kiali
@@ -51,11 +52,14 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   }
   ```
   
+
   ```sh
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
-  createSubscription "opendatahub-operator" "community-operators"
+  # createSubscription "opendatahub-operator" "community-operators"
+  # temp, until operator changes are merged.
+  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.1 --namespace openshift-operators
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
@@ -65,7 +69,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 
 ```sh
 until kubectl get crd servicemeshcontrolplanes.maistra.io  >/dev/null 2>&1; do  echo 'Waiting for smcp CRD to appear...'; sleep 1; done
-kustomize build service-mesh | kubectl apply -f -
+kustomize build service-mesh/control-plane/base | kubectl apply -f -
 sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
 ```
@@ -144,7 +148,13 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-## Setting up Authorizantion Service
+Patch ODHDashboardConfig to enable ServiceMesh. 
+
+```sh
+kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
+```
+
+## Setting up Authorization Service
 
 ```sh
 export AUTH_NS=auth-provider
@@ -155,7 +165,7 @@ export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -
 endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
-kustomize build auth/cluster | envsubst | kubectl apply -f - 
+kustomize build service-mesh/auth/cluster | envsubst | kubectl apply -f -
 until kubectl get deployments -n $AUTH_NS  >/dev/null 2>&1; do  echo 'Waiting for AUTH_NS deployments to appear...'; sleep 1; done
 kubectl wait --for condition=available deployment --all --timeout 360s -n $AUTH_NS
 ```
@@ -169,7 +179,7 @@ kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl rollout re
 Mount OAuth2 secrets to Istio gateways
 
 ```sh
-kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
+kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
 ```
 
 You can validate if the secrets are mounted by executing (it might take some time for pod to show up with updated config):
@@ -182,7 +192,7 @@ kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o 
 Register [external authz provider](https://istio.io/latest/docs/tasks/security/authorization/authz-custom/) in Service Mesh:
 
 ```sh
-kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-external-provider.yaml --type=merge
+kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-external-provider.yaml --type=merge
 ```
 
 Now you can open Open Data Hub dashboard in the browser:
@@ -204,7 +214,7 @@ kubectl logs $(kubectl get pod -l app=oauth-openshift -n openshift-authenticatio
 * wrong redirect URL
 * mismatching secret between what OAuth client has defined and what is stored in the ConfigMap (that yields an error of unauthenticated client `E0328 18:39:56.277217       1 access.go:177] osin: error=unauthorized_client, internal_error=<nil> get_client=client check failed, client_id=odh`)
 
-In case of the latter check if the token is the same everywhere, but comparing output of the following commands:
+In case of the latter check if the token is the same everywhere by comparing output of the following commands:
 
 ```sh
 kubectl get oauthclient.oauth.openshift.io odh
