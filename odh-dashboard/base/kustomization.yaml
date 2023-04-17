@@ -23,6 +23,6 @@ resources:
 - model-serving-role-binding.yaml
 images:
 - name: odh-dashboard
-  newName: quay.io/maistra-dev/odh-dashboard
+  newName: quay.io/maistra-dev/ossm_annotations
   newTag: maistra-dev
 
