@@ -134,12 +134,12 @@ Let's start with the namespace
 export ODH_NS=opendatahub
 kubectl create ns $ODH_NS
 ```
-
+<!-- 
 to add the project to Service Mesh and set up the routing:
 
 ```sh
 kustomize build odh-dashboard/overlays/service-mesh | kubectl apply -f -
-```
+``` -->
 
 and finally to create ODH project:
 
@@ -155,11 +155,11 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-Patch `ODHDashboardConfig` to enable Service Mesh.
+<!-- Patch `ODHDashboardConfig` to enable Service Mesh.
 
 ```sh
 kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
-```
+``` -->
 
 ## Setting up Authorization Service
 

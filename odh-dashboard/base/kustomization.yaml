@@ -6,6 +6,7 @@ commonLabels:
 bases:
   - ../apps
   - ../modelserving
+  - ../overlays/service-mesh
 resources:
 - role.yaml
 - cluster-role.yaml

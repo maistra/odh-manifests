@@ -4,3 +4,4 @@ resources:
 - smm.yaml
 - gateway.yaml
 - virtual-service.yaml
+- patch-dashboard-config.yaml
