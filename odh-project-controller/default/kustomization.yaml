@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../rbac
+  - ../manager
+
+
+# Adds namespace to all resources.
+namespace: odh-project-controller
+
+namePrefix: odh-project-controller-
+
+# Labels to add to all resources and selectors.
+commonLabels:
+  app: odh-project-controller
+  app.kubernetes.io/part-of: odh-project-controller
+  kustomize.component: odh-project-controller
+  component.opendatahub.io/name: odh-project-controller
+  opendatahub.io/component: "true"
