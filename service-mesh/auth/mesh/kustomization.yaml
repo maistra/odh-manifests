@@ -7,6 +7,7 @@ resources:
 - oauth-client.yaml
 - proxy/filter-oauth2.yaml
 - proxy/filter-propagate-token.yaml
+- control-plane.yaml
 
 patches:
 - path: patch-control-plane-mount-oauth2-secrets.yaml
