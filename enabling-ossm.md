@@ -59,7 +59,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "servicemeshoperator"
   # createSubscription "opendatahub-operator" "community-operators"
   # temp, until operator changes are merged.
-  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.1 --namespace openshift-operators
+  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.1 --namespace openshift-operators --timeout 5m0s
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
@@ -87,24 +87,31 @@ metadata:
 spec:
  applications:
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-common
+      repoRef:
+        name: manifests
+        path: odh-common
    name: odh-common
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-dashboard
+      overlays:
+        - service-mesh
+      repoRef:
+        name: manifests
+        path: odh-dashboard
    name: odh-dashboard
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-notebook-controller
+      repoRef:
+        name: manifests
+        path: odh-notebook-controller
    name: odh-notebook-controller
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: notebook-images
+      repoRef:
+        name: manifests
+        path: odh-project-controller
+   name: odh-project-controller
+ - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: notebook-images
    name: notebook-images
  repos:
  - name: manifests
@@ -137,9 +144,9 @@ kustomize build odh-dashboard/overlays/service-mesh | kubectl apply -f -
 and finally to create ODH project:
 
 ```sh
-kubectl apply -n $ODH_NS -f - < <(kfdef)  
-until kubectl get deployments -n $ODH_NS  >/dev/null 2>&1; do  echo 'Waiting for ODH deployments to appear...'; sleep 1; done
-kubectl wait --for condition=available deployment --all --timeout 360s -n $ODH_NS
+kubectl apply -n $ODH_NS -f - < <(kfdef)
+kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
+kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of all deployments if that's not the case.
@@ -148,7 +155,7 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-Patch ODHDashboardConfig to enable ServiceMesh. 
+Patch `ODHDashboardConfig` to enable Service Mesh.
 
 ```sh
 kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
@@ -166,8 +173,7 @@ endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q -
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
 kustomize build service-mesh/auth/cluster | envsubst | kubectl apply -f -
-until kubectl get deployments -n $AUTH_NS  >/dev/null 2>&1; do  echo 'Waiting for AUTH_NS deployments to appear...'; sleep 1; done
-kubectl wait --for condition=available deployment --all --timeout 360s -n $AUTH_NS
+kubectl wait --for condition=ready pod --all --timeout 360s -n $AUTH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
