@@ -165,8 +165,8 @@ kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file od
 
 ```sh
 export AUTH_NS=auth-provider
-export CLIENT_SECRET=$(openssl rand -base64 32)
-export CLIENT_HMAC=$(openssl rand -base64 32)
+export CLIENT_SECRET=$(openssl rand -hex 32)
+export CLIENT_HMAC=$(openssl rand -hex 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
 endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
