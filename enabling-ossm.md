@@ -155,11 +155,11 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-<!-- Patch `ODHDashboardConfig` to enable Service Mesh.
+Patch `ODHDashboardConfig` to enable Service Mesh.
 
 ```sh
 kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
-``` -->
+```
 
 ## Setting up Authorization Service
 
@@ -182,11 +182,11 @@ Check if Istio proxy is deployed. Trigger restart of deployment if that's not th
 kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl rollout restart deployment authorino -n $AUTH_NS
 ```
 
-Mount OAuth2 secrets to Istio gateways
+Mount OAuth2 secrets to Istio gateways (done by kustomize)
 
-```sh
+<!-- ```sh
 kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
-```
+``` -->
 
 You can validate if the secrets are mounted by executing (it might take some time for pod to show up with updated config):
 
@@ -194,12 +194,12 @@ You can validate if the secrets are mounted by executing (it might take some tim
 kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
 kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls -al /etc/istio/odh-oauth2
 ```
-
+<!-- 
 Register [external authz provider](https://istio.io/latest/docs/tasks/security/authorization/authz-custom/) in Service Mesh:
 
 ```sh
 kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-external-provider.yaml --type=merge
-```
+``` -->
 
 Now you can open Open Data Hub dashboard in the browser:
 
