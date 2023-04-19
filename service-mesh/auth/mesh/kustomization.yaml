@@ -5,6 +5,7 @@ resources:
 # - oauth.secret.yaml
 - oauth-configmap.yaml
 - oauth-client.yaml
+- auth-policy.yaml
 - proxy/filter-oauth2.yaml
 - proxy/filter-propagate-token.yaml
 - control-plane.yaml
