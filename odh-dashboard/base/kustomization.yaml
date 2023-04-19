@@ -25,5 +25,5 @@ resources:
 images:
 - name: odh-dashboard
   newName: quay.io/maistra-dev/odh-dashboard
-  newTag: ds_proj_routing
+  newTag: ds-proj-routing
 
