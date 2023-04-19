@@ -9,15 +9,26 @@ spec:
   hosts:
   - "${ODH_ROUTE}"
   identity:
-  - name: authorized-service-accounts
+  - name: kubernetes-users
     kubernetes:
       audiences: 
-      - "https://kubernetes.default.svc" # TODO create an odh group instead?
+      - "https://kubernetes.default.svc"
   authorization:
-  - name: k8s-rbac
+  - name: k8s-rbac-only-service-viewers
     kubernetes:
       user:
         valueFrom: { authJSON: auth.identity.username }
+      resourceAttributes:
+        namespace:
+          value: $ODH_NS
+        group:
+          value: ""
+        resource:
+          value: services
+        name:
+          value: odh-dashboard
+        verb:
+          value: get
   response:
   - name: x-auth-data
     json:
@@ -25,7 +36,10 @@ spec:
       - name: username
         valueFrom: { authJSON: auth.identity.username }
   denyWith:
+    unauthenticated:      
+      message:
+        value: "Access denied"
     unauthorized:
       message:
-        value: "Authorino denied"
+        value: "Unauthorized"
 
