@@ -87,6 +87,8 @@ metadata:
 spec:
  applications:
  - kustomizeConfig:
+      overlays:
+        - service-mesh
       repoRef:
         name: manifests
         path: odh-common
