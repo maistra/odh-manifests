@@ -9,6 +9,7 @@
   * `envsubst`
   * `openssl`
   * `jq` and `yq`
+  * (until operator changes are merged) `operator-sdk` v1.24.1
 
 * Installed operators
   * Kiali
@@ -51,11 +52,14 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   }
   ```
   
+
   ```sh
   createSubscription "kiali-ossm"
   createSubscription "jaeger-product"
   createSubscription "servicemeshoperator"
-  createSubscription "opendatahub-operator" "community-operators"
+  # createSubscription "opendatahub-operator" "community-operators"
+  # temp, until operator changes are merged.
+  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.1 --namespace openshift-operators --timeout 5m0s
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
@@ -65,7 +69,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
 
 ```sh
 until kubectl get crd servicemeshcontrolplanes.maistra.io  >/dev/null 2>&1; do  echo 'Waiting for smcp CRD to appear...'; sleep 1; done
-kustomize build service-mesh | kubectl apply -f -
+kustomize build service-mesh/control-plane/base | kubectl apply -f -
 sleep 4 # to prevent kubectl wait from failing
 kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
 ```
@@ -83,24 +87,33 @@ metadata:
 spec:
  applications:
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-common
+      overlays:
+        - service-mesh
+      repoRef:
+        name: manifests
+        path: odh-common
    name: odh-common
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-dashboard
+      overlays:
+        - service-mesh
+      repoRef:
+        name: manifests
+        path: odh-dashboard
    name: odh-dashboard
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: odh-notebook-controller
+      repoRef:
+        name: manifests
+        path: odh-notebook-controller
    name: odh-notebook-controller
  - kustomizeConfig:
-     repoRef:
-       name: manifests
-       path: notebook-images
+      repoRef:
+        name: manifests
+        path: odh-project-controller
+   name: odh-project-controller
+ - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: notebook-images
    name: notebook-images
  repos:
  - name: manifests
@@ -123,19 +136,19 @@ Let's start with the namespace
 export ODH_NS=opendatahub
 kubectl create ns $ODH_NS
 ```
-
+<!-- 
 to add the project to Service Mesh and set up the routing:
 
 ```sh
 kustomize build odh-dashboard/overlays/service-mesh | kubectl apply -f -
-```
+``` -->
 
 and finally to create ODH project:
 
 ```sh
-kubectl apply -n $ODH_NS -f - < <(kfdef)  
-until kubectl get deployments -n $ODH_NS  >/dev/null 2>&1; do  echo 'Waiting for ODH deployments to appear...'; sleep 1; done
-kubectl wait --for condition=available deployment --all --timeout 360s -n $ODH_NS
+kubectl apply -n $ODH_NS -f - < <(kfdef)
+kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
+kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of all deployments if that's not the case.
@@ -144,20 +157,25 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-## Setting up Authorizantion Service
+Patch `ODHDashboardConfig` to enable Service Mesh.
+
+```sh
+kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
+```
+
+## Setting up Authorization Service
 
 ```sh
 export AUTH_NS=auth-provider
-export CLIENT_SECRET=$(openssl rand -base64 32)
-export CLIENT_HMAC=$(openssl rand -base64 32)
+export CLIENT_SECRET=$(openssl rand -hex 32)
+export CLIENT_HMAC=$(openssl rand -hex 32)
 export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
 export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
 endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
 export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
 export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
-kustomize build auth/cluster | envsubst | kubectl apply -f - 
-until kubectl get deployments -n $AUTH_NS  >/dev/null 2>&1; do  echo 'Waiting for AUTH_NS deployments to appear...'; sleep 1; done
-kubectl wait --for condition=available deployment --all --timeout 360s -n $AUTH_NS
+kustomize build service-mesh/auth/cluster | envsubst | kubectl apply -f -
+kubectl wait --for condition=ready pod --all --timeout 360s -n $AUTH_NS
 ```
 
 Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
@@ -166,11 +184,11 @@ Check if Istio proxy is deployed. Trigger restart of deployment if that's not th
 kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl rollout restart deployment authorino -n $AUTH_NS
 ```
 
-Mount OAuth2 secrets to Istio gateways
+Mount OAuth2 secrets to Istio gateways (done by kustomize)
 
-```sh
-kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
-```
+<!-- ```sh
+kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
+``` -->
 
 You can validate if the secrets are mounted by executing (it might take some time for pod to show up with updated config):
 
@@ -178,12 +196,12 @@ You can validate if the secrets are mounted by executing (it might take some tim
 kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
 kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls -al /etc/istio/odh-oauth2
 ```
-
+<!-- 
 Register [external authz provider](https://istio.io/latest/docs/tasks/security/authorization/authz-custom/) in Service Mesh:
 
 ```sh
-kubectl patch smcp/basic -n istio-system --patch-file auth/mesh/patch-control-plane-external-provider.yaml --type=merge
-```
+kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-external-provider.yaml --type=merge
+``` -->
 
 Now you can open Open Data Hub dashboard in the browser:
 
@@ -204,7 +222,7 @@ kubectl logs $(kubectl get pod -l app=oauth-openshift -n openshift-authenticatio
 * wrong redirect URL
 * mismatching secret between what OAuth client has defined and what is stored in the ConfigMap (that yields an error of unauthenticated client `E0328 18:39:56.277217       1 access.go:177] osin: error=unauthorized_client, internal_error=<nil> get_client=client check failed, client_id=odh`)
 
-In case of the latter check if the token is the same everywhere, but comparing output of the following commands:
+In case of the latter check if the token is the same everywhere by comparing output of the following commands:
 
 ```sh
 kubectl get oauthclient.oauth.openshift.io odh
