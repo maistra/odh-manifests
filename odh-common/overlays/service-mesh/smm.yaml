@@ -2,7 +2,7 @@ apiVersion: maistra.io/v1
 kind: ServiceMeshMember
 metadata:
   name: default
-  namespace: opendatahub
+  namespace: opendatahub # TODO params?
 spec:
   controlPlaneRef:
     namespace: istio-system
