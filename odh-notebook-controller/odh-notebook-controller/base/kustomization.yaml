@@ -4,5 +4,5 @@ resources:
 - ../default
 images:
 - name: quay.io/opendatahub/odh-notebook-controller
-  newName: quay.io/bmajsak/odh-notebook-controller
+  newName: quay.io/maistra-dev/odh-notebook-controller
   newTag: enable_ossm
