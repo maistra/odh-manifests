@@ -7,8 +7,6 @@ commonLabels:
   opendatahub.io/component: "true"
   component.opendatahub.io/name: odh-common
   app.kubernetes.io/part-of: odh-common
-bases:
-  - ../overlays/service-mesh
 
 configMapGenerator:
 - name: odh-common-config
