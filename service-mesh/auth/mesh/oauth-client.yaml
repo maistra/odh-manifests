@@ -2,7 +2,9 @@ kind: OAuthClient
 apiVersion: oauth.openshift.io/v1
 metadata:
  name: odh
-secret: "${CLIENT_SECRET}"
+# TODO:HARDCODED
+secret: "a74354e59b907f8798b493f36d7269b2d7bf58034e19fad1762516f4c4df958f" # gitleaks:allow
 redirectURIs:
-- "https://${ODH_ROUTE}"
+# TODO:HARDCODED
+- "https://opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing"
 grantMethod: prompt

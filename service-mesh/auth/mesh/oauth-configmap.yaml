@@ -3,18 +3,19 @@ kind: ConfigMap
 metadata:
   name: istio-odh-oauth2
   namespace: istio-system
-data:
+data: # TODO:HARDCODED client secret
   token-secret.yaml: |-
     resources:
     - "@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret"
       name: token
       generic_secret:
         secret:
-          inline_string: "${CLIENT_SECRET}"
+          inline_string: "a74354e59b907f8798b493f36d7269b2d7bf58034e19fad1762516f4c4df958f" 
   hmac-secret.yaml: |-
     resources:
     - "@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret"
       name: hmac
       generic_secret:
         secret:
-          inline_bytes: "${CLIENT_HMAC}"
+          inline_bytes: "f95cef6e3f63917911b401c5fc5da915189ed0d7626f603542079b44593664a7"
+# TODO:HARDCODED

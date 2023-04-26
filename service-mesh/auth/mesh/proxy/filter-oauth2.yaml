@@ -28,7 +28,7 @@ spec:
           name: envoy.transport_sockets.tls
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-            sni: ${OAUTH_ROUTE}
+            sni: oauth-openshift.apps-crc.testing # TODO:HARDCODED
         load_assignment:
           cluster_name: oauth-openshift
           endpoints:
@@ -36,7 +36,7 @@ spec:
             - endpoint:
                 address:
                   socket_address:
-                    address: ${OAUTH_ROUTE}
+                    address: oauth-openshift.apps-crc.testing # TODO:HARDCODED
                     port_value: 443
   - applyTo: HTTP_FILTER
     match:
@@ -56,9 +56,9 @@ spec:
          config:
           token_endpoint:
             cluster: oauth-openshift
-            uri:  ${TOKEN_ENDPOINT}
+            uri: "https://oauth-openshift.apps-crc.testing/oauth/token" # TODO:HARDCODED
             timeout: 3s
-          authorization_endpoint: ${AUTH_ENDPOINT}
+          authorization_endpoint: "https://oauth-openshift.apps-crc.testing/oauth/authorize" # TODO:HARDCODED
           redirect_uri: "https://%REQ(:authority)%/callback"
           redirect_path_matcher:
             path:
