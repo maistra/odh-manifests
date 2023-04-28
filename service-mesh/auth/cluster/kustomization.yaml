@@ -4,6 +4,4 @@ kind: Kustomization
 #   order: fifo # otherwise ServiceMeshMember will be created after the deployment and thus istio will not inject sidecar proxy
 resources:
 - namespace.yaml
-- ../mesh
-- ../base
-- ../rbac # TODO review
+

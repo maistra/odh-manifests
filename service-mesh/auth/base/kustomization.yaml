@@ -3,3 +3,8 @@ kind: Kustomization
 resources:
 - operator-cluster-wide-no-tls.yaml
 - authconfig.yaml
+
+bases:
+- ../mesh
+- ../cluster
+- ../rbac
