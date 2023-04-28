@@ -7,7 +7,7 @@ spec:
   version: v2.3
   proxy:
     injection:
-      autoInject: true
+      autoInject: false
     runtime:
       container:
         resources:

@@ -6,3 +6,4 @@ resources:
 - namespace.yaml
 - cert-secret.yaml
 - control-plane.yaml
+- gateway-route.yaml
