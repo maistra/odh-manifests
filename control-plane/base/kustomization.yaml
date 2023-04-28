@@ -7,3 +7,17 @@ resources:
 - cert-secret.yaml
 - control-plane.yaml
 - gateway-route.yaml
+- patch-control-plane-mount-oauth2-secrets.yaml
+- patch-control-plane-external-provider.yaml
+
+patches:
+- path: patch-control-plane-mount-oauth2-secrets.yaml
+  target:
+    kind: ServiceMeshControlPlane
+    name: basic
+    namespace: istio-system
+- path: patch-control-plane-external-provider.yaml
+  target:
+    kind: ServiceMeshControlPlane
+    name: basic
+    namespace: istio-system
