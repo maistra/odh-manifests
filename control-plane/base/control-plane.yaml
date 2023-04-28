@@ -7,7 +7,7 @@ spec:
   version: v2.3
   proxy:
     injection:
-      autoInject: false
+      autoInject: true
     runtime:
       container:
         resources:
@@ -29,3 +29,6 @@ spec:
     kiali:
       enabled: true
       name: kiali
+  gateways:
+    openshiftRoute:
+      enabled: false
