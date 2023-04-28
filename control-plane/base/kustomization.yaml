@@ -7,8 +7,8 @@ resources:
 - cert-secret.yaml
 - control-plane.yaml
 - gateway-route.yaml
-- patch-control-plane-mount-oauth2-secrets.yaml
-- patch-control-plane-external-provider.yaml
+- proxy/filter-oauth2.yaml
+- proxy/filter-propagate-token.yaml
 
 patches:
 - path: patch-control-plane-mount-oauth2-secrets.yaml
