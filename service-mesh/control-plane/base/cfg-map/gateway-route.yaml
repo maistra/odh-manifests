@@ -9,7 +9,7 @@ metadata:
     maistra.io/gateway-name: odh-gateway
     maistra.io/gateway-namespace: opendatahub
 spec:
-  host: opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing
+  host: opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing # TODO:HARDCODED
   to:
     kind: Service
     name: istio-ingressgateway

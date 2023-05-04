@@ -6,10 +6,8 @@ resources:
 - namespace.yaml
 - cert-secret.yaml
 - control-plane.yaml
-- gateway-route.yaml
-- proxy/filter-oauth2.yaml
+- proxy/auth-policy.yaml
 - proxy/filter-propagate-token.yaml
-- oauth-configmap.yaml
 
 patches:
 - path: patch-control-plane-mount-oauth2-secrets.yaml
@@ -22,3 +20,15 @@ patches:
     kind: ServiceMeshControlPlane
     name: basic
     namespace: istio-system
+
+configMapGenerator:
+  - name: mounting-configmap
+    files:
+      - proxy/filter-oauth2.yaml
+      - cfg-map/oauth-configmap.yaml
+      - cfg-map/oauth-client.yaml
+      - cfg-map/gateway-route.yaml
+      - cfg-map/authconfig.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

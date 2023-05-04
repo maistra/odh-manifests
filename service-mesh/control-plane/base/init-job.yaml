@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: odh-ossm-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: odh-ossm-init-job
+        image: quay.io/openshift/origin-cli
+        command: ["/bin/bash", "-c", "--"]
+        args:
+          - |
+            etcdpasswordexists=$(oc get secrets -o name | grep etcd-passwords || echo "false")
+            modelservingetcdexists=$(oc get secrets -o name | grep model-serving-etcd || echo "false")
+            
+            ls -l /etc/cfg-map
+            exit 0
+            fi
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cfg-map
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mounting-configmap
+      restartPolicy: Never
