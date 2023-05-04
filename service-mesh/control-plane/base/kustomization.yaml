@@ -9,8 +9,8 @@ resources:
 - proxy/auth-policy.yaml
 - proxy/filter-propagate-token.yaml
 
-bases:
-- ../init-job
+# bases:
+# - ../init-job
 
 patches:
 - path: patch-control-plane-mount-oauth2-secrets.yaml
