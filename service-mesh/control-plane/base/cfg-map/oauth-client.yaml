@@ -3,7 +3,7 @@ apiVersion: oauth.openshift.io/v1
 metadata:
  name: odh
 # TODO:HARDCODED
-secret: "$CLIENT_SECRET" # gitleaks:allow
+secret: "$CLIENTS_SECRET" # gitleaks:allow
 redirectURIs:
 # TODO:HARDCODED
 - "https://opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.$DOMAIN"
