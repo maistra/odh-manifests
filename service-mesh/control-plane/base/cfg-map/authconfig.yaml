@@ -8,7 +8,7 @@ metadata:
 spec:
   hosts:
   # TODO:HARDCODED - WILL ONLY WORK ON CRC.
-  - "opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.apps-crc.testing"
+  - "opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.$DOMAIN"
   identity:
   - name: kubernetes-users
     kubernetes:

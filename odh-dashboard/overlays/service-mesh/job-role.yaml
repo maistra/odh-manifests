@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: init-job-role
+  namespace: opendatahub
+rules:
+  - apiGroups:
+      - "authorino.kuadrant.io"
+    resources:
+      - authconfigs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch

@@ -12,6 +12,8 @@ rules:
       - routes
       - oauthclients
       - envoyfilters
+      - pods
+      - pods/log
     verbs:
       - create
       - delete
@@ -20,3 +22,9 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups: 
+      - "config.openshift.io"
+    resources:
+      - ingresses
+    verbs:
+      - get
