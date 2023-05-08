@@ -9,9 +9,7 @@ rules:
       - secrets
       - configmaps
       - authconfigs
-      - routes
       - oauthclients
-      - envoyfilters
       - pods
       - pods/log
     verbs:
@@ -28,3 +26,21 @@ rules:
       - ingresses
     verbs:
       - get
+  - apiGroups:
+      - "networking.istio.io"
+    resources:
+      - envoyfilters
+    verbs:
+      - create
+      - get
+      - update
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update

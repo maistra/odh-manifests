@@ -13,24 +13,75 @@ spec:
           - |
             etcdpasswordexists=$(oc get secrets -o name | grep etcd-passwords || echo "false")
             modelservingetcdexists=$(oc get secrets -o name | grep model-serving-etcd || echo "false")
-            export CLIENTS_SECRET=$(hexdump -vn32 -e'8/8 "%08X" 1 "\n"' /dev/urandom)
-            export HMACS_SECRET=$(hexdump -vn32 -e'8/8 "%08X" 1 "\n"' /dev/urandom)
+
+            export CLIENTS_SECRET=$(hexdump -vn32 -e'8/8 "%08X" 1 "\n"' /dev/urandom | xargs)
+            export HMACS_SECRET=$(hexdump -vn32 -e'8/8 "%08X" 1 "\n"' /dev/urandom | xargs)
+            export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
+            echo $DOMAIN
+            endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
+            export endpoint
+            export OAUTH_ROUTE="oauth-openshift.$DOMAIN" # not 100% sure this will be universal.
+            echo $OAUTH_ROUTE
+
+            # No jq, use python to parse endpoints.
+            export TOKEN_ENDPOINT=$(python -c "import os, json; \
+            endpoint = os.environ['endpoint']; \
+            loaded_json = json.loads(endpoint); \
+            print(loaded_json['token_endpoint'])")
+
+            export AUTH_ENDPOINT=$(python -c "import os, json; \
+            endpoint = os.environ['endpoint']; \
+            loaded_json = json.loads(endpoint); \
+            print(loaded_json['authorization_endpoint'])")
+
+            echo $TOKEN_ENDPOINT
+            echo $AUTH_ENDPOINT
+
             # tmp
             echo $CLIENTS_SECRET
             echo $HMACS_SECRET
             ls -l /etc/cfg-map
 
-            clusterdomain=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
-            echo $clusterdomain
+            python -c "
+            import os
+            
+            text=os.path.expandvars('$CLIENTS_SECRET/test/testing')
+            print(text)" | cat -n 
 
-            endpoint=$(kubectl -n istio-system run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
-            echo $endpoint
+            apply_yaml() {
+              filename="$1"
 
-            function subst() { eval echo -E "$2"; }
-            mapfile -c 1 -C subst < etc/cfg-map/oauth-configmap.yaml | cat
+              case "$filename" in
+                "/etc/cfg-map/authconfig.yaml")
+                  namespace="opendatahub"
+                  ;;
+                *)
+                  namespace="istio-system"
+                  ;;
+              esac
 
+              # Read in the contents of the YAML file
+              yaml=$(cat "$filename")
+
+              # Substitute environment variables using a Python script
+              substituted_yaml=$(python -c "
+            import os
+
+            yaml_text = '''$yaml'''
+            yaml_text_with_env = os.path.expandvars(yaml_text)
+            print(yaml_text_with_env)
+            ")
+              # Apply the substituted YAML using kubectl
+                echo "$substituted_yaml" | kubectl apply -n $namespace -f -
+            }
+
+            # iterate over all files in the subdirectory
+            for filename in /etc/cfg-map/*
+            do
+              apply_yaml "$filename"
+            done
             exit 0
-            fi
+            
         volumeMounts:
           - name: config-volume
             mountPath: /etc/cfg-map
