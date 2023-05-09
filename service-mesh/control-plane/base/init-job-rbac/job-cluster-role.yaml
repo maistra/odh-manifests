@@ -62,3 +62,10 @@ rules:
     verbs:
       - get
       - patch
+  - apiGroups:
+      - maistra.io
+    resources: 
+      - servicemeshcontrolplanes
+    verbs:
+      - get
+      - watch
