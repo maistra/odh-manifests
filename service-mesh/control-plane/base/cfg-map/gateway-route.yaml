@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: opendatahub-odh-gateway-525eca1d5089dbdc
+  name: opendatahub-odh-gateway
   namespace: istio-system
   labels:
     app: odh-dashboard
@@ -9,7 +9,7 @@ metadata:
     maistra.io/gateway-name: odh-gateway
     maistra.io/gateway-namespace: opendatahub
 spec:
-  host: opendatahub-odh-gateway-525eca1d5089dbdc-istio-system.$DOMAIN # TODO:HARDCODED
+  host: opendatahub-odh-gateway-istio-system.$DOMAIN # TODO:HARDCODED
   to:
     kind: Service
     name: istio-ingressgateway
