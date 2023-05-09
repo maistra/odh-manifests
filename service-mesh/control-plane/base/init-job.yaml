@@ -11,42 +11,31 @@ spec:
         command: ["/bin/bash", "-c", "--"]
         args:
           - |
-            # etcdpasswordexists=$(oc get secrets -o name | grep etcd-passwords || echo "false")
-            # modelservingetcdexists=$(oc get secrets -o name | grep model-serving-etcd || echo "false")
+            mkdir /tmp/bin
+
+            # install jq for json parsing. 
+            wget https://stedolan.github.io/jq/download/linux64/jq  -O /tmp/bin/jq  && chmod +x /tmp/bin/jq 
+
+            # install envsubst 
+            curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
+            export PATH=/tmp/bin:$PATH
 
             export CLIENTS_SECRET=$(openssl rand -hex 32)
             export HMACS_SECRET=$(openssl rand -hex 32)
             export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
             echo $DOMAIN
             endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
-            export endpoint
-            export OAUTH_ROUTE="oauth-openshift.$DOMAIN" # not 100% sure this will be universal.
-            echo $OAUTH_ROUTE
-
-            # No jq, use python to parse endpoints.
-            export TOKEN_ENDPOINT=$(python -c "import os, json; \
-            endpoint = os.environ['endpoint']; \
-            loaded_json = json.loads(endpoint); \
-            print(loaded_json['token_endpoint'])")
-
-            export AUTH_ENDPOINT=$(python -c "import os, json; \
-            endpoint = os.environ['endpoint']; \
-            loaded_json = json.loads(endpoint); \
-            print(loaded_json['authorization_endpoint'])")
+            export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
+            export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
+            export OAUTH_ROUTE=$(echo $endpoint | jq .issuer | sed 's/"//g; s/https:\/\///g') # remove quotes and https
 
             echo $TOKEN_ENDPOINT
             echo $AUTH_ENDPOINT
+            echo $OAUTH_ROUTE
 
             # tmp
             echo $CLIENTS_SECRET
             echo $HMACS_SECRET
-            ls -l /etc/cfg-map
-
-            python -c "
-            import os
-            
-            text=os.path.expandvars('$CLIENTS_SECRET/test/testing')
-            print(text)" | cat -n 
 
             apply_yaml() {
               filename="$1"
@@ -63,16 +52,8 @@ spec:
               # Read in the contents of the YAML file
               yaml=$(cat "$filename")
 
-              # Substitute environment variables using a Python script
-              substituted_yaml=$(python -c "
-            import os
-
-            yaml_text = '''$yaml'''
-            yaml_text_with_env = os.path.expandvars(yaml_text)
-            print(yaml_text_with_env)
-            ")
               # Apply the substituted YAML using kubectl
-                echo "$substituted_yaml" | kubectl apply -n $namespace -f -
+              echo "$yaml" | envsubst | kubectl apply -n $namespace -f -
             }
 
             # wait for app to be ready
