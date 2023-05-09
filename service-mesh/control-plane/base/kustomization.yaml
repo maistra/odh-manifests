@@ -9,9 +9,9 @@ resources:
 - proxy/auth-policy.yaml
 - proxy/filter-propagate-token.yaml
 - init-job.yaml
-
-bases:
-- ../init-job
+- init-job-rbac/job-cluster-role.yaml
+- init-job-rbac/job-rolebinding.yaml
+- init-job-rbac/job-sa.yaml
 
 patches:
 - path: patch-control-plane-mount-oauth2-secrets.yaml
