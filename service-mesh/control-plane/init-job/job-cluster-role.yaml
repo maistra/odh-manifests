@@ -6,10 +6,7 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - secrets
       - configmaps
-      - authconfigs
-      - oauthclients
       - pods
       - pods/log
     verbs:
@@ -38,9 +35,30 @@ rules:
       - route.openshift.io
     resources:
       - routes
+      - routes/custom-host
     verbs:
       - get
       - list
       - watch
       - create
       - update
+      - patch
+  - apiGroups:
+      - oauth.openshift.io 
+    resources:
+      - oauthclients
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - patch
