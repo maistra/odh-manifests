@@ -75,6 +75,9 @@ spec:
                 echo "$substituted_yaml" | kubectl apply -n $namespace -f -
             }
 
+            # wait for app to be ready
+            kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=60s
+
             # iterate over all files in the subdirectory
             for filename in /etc/cfg-map/*
             do
