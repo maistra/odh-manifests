@@ -27,6 +27,7 @@ rules:
       - "networking.istio.io"
     resources:
       - envoyfilters
+      - authorizationpolicies
     verbs:
       - create
       - get
