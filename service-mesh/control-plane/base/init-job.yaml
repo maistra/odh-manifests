@@ -58,7 +58,7 @@ spec:
 
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
-            kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=60s
+            kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=180s
 
             # wait for odh-dashboard to create ODHDashboardConfig in opendatahub ns
             while true; do

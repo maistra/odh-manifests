@@ -27,6 +27,13 @@ rules:
       - "networking.istio.io"
     resources:
       - envoyfilters
+    verbs:
+      - create
+      - get
+      - update
+  - apiGroups:
+      - "security.istio.io"
+    resources:
       - authorizationpolicies
     verbs:
       - create
