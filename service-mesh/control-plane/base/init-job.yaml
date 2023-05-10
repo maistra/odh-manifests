@@ -57,6 +57,7 @@ spec:
             }
 
             # wait for app to be ready
+            echo "waiting for SMCP to be ready"
             kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=60s
 
             # iterate over all files in the subdirectory

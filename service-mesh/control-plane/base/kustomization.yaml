@@ -6,8 +6,6 @@ resources:
 - namespace.yaml
 - cert-secret.yaml
 - control-plane.yaml
-- proxy/auth-policy.yaml
-- proxy/filter-propagate-token.yaml
 - init-job.yaml
 - init-job-rbac/job-cluster-role.yaml
 - init-job-rbac/job-rolebinding.yaml
@@ -33,6 +31,8 @@ configMapGenerator:
       - resource-templates/oauth-client.yaml
       - resource-templates/gateway-route.yaml
       - resource-templates/authconfig.yaml
+      - proxy/auth-policy.yaml
+      - proxy/filter-propogate-token.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
