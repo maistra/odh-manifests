@@ -28,11 +28,11 @@ patches:
 configMapGenerator:
   - name: mounting-configmap
     files:
-      - transformed-resources/filter-oauth2.yaml
-      - transformed-resources/oauth-configmap.yaml
-      - transformed-resources/oauth-client.yaml
-      - transformed-resources/gateway-route.yaml
-      - transformed-resources/authconfig.yaml
+      - resource-templates/filter-oauth2.yaml
+      - resource-templates/oauth-configmap.yaml
+      - resource-templates/oauth-client.yaml
+      - resource-templates/gateway-route.yaml
+      - resource-templates/authconfig.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
