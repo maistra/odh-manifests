@@ -41,7 +41,7 @@ spec:
               filename="$1"
 
               case "$filename" in
-                "/etc/cfg-map/authconfig.yaml")
+                "/etc/cfg-map/authconfig.yaml" | "/etc/cfg-map/patch-dashboard-config.yaml")
                   namespace="opendatahub"
                   ;;
                 *)
@@ -59,6 +59,18 @@ spec:
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
             kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=60s
+
+            # wait for odh-dashboard to create ODHDashboardConfig in opendatahub ns
+            while true; do
+              # check if the resource exists
+              if kubectl get odhdashboardconfig odh-dashboard-config -n opendatahub >/dev/null 2>&1; then
+                echo "Resource ODHDashboardconfig found in namespace opendatahub"
+                break
+              fi
+
+              # wait for the interval before checking again
+              sleep 5
+            done 
 
             # iterate over all files in the subdirectory
             for filename in /etc/cfg-map/*

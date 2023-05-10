@@ -16,3 +16,13 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups:
+      - "opendatahub.io"
+    resources:
+      - odhdashboardconfigs
+    verbs:
+      - get
+      - list
+      - update
+      - patch
+      - watch
