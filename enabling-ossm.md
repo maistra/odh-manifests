@@ -144,11 +144,6 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-Patch `ODHDashboardConfig` to enable Service Mesh routing in ODH-dashboard.
-
-```sh
-kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
-```
 
 Now you can open Open Data Hub dashboard in the browser:
 
