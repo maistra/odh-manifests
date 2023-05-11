@@ -116,8 +116,8 @@ spec:
    name: authorino
  repos:
  - name: manifests
-   uri: https://github.com/cam-garrison/odh-manifests/tarball/hardcode-manifests
- version: hardcode-manifests
+   uri: https://github.com/maistra/odh-manifests/tarball/maistra-dev
+ version: maistra-dev
 EOF
 ```
 
