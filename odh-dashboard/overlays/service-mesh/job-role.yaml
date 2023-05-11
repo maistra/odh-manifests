@@ -5,7 +5,7 @@ metadata:
   namespace: opendatahub
 rules:
   - apiGroups:
-      - "authorino.kuadrant.io"
+      - authorino.kuadrant.io
     resources:
       - authconfigs
     verbs:
