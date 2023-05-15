@@ -4,7 +4,7 @@ metadata:
   name: authorino
   namespace: $AUTH_NS
 spec:
-  image: quay.io/kuadrant/authorino:v0.12.0
+  image: quay.io/kuadrant/authorino:v0.13.0
   authConfigLabelSelectors: authorino/topic=odh
   clusterWide: true
   listener:
