@@ -59,7 +59,7 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "servicemeshoperator"
   # createSubscription "opendatahub-operator" "community-operators"
   # temp, until operator changes are merged.
-  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.1 --namespace openshift-operators --timeout 5m0s
+  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.2 --namespace openshift-operators --timeout 5m0s
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
