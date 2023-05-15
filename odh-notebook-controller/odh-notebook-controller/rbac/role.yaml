@@ -70,3 +70,28 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - maistra.io
+  resources:
+  - servicemeshmembers
+  - servicemeshcontrolplanes
+  - servicemeshmemberroles
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - use # TODO check if only this is needed
+- apiGroups:
+  - authorino.kuadrant.io
+  resources:
+  - authconfigs
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
