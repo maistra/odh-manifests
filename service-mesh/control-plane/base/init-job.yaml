@@ -23,7 +23,6 @@ spec:
             export CLIENT_SECRET=$(openssl rand -hex 32)
             export HMAC_SECRET=$(openssl rand -hex 32)
             export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
-            echo $DOMAIN
             endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
             export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
             export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
