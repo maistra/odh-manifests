@@ -9,5 +9,5 @@ roleRef:
   name: init-job-role
 subjects:
   - kind: ServiceAccount
-    name: init-job-serviceaccount
+    name: init-job-executor
     namespace: istio-system

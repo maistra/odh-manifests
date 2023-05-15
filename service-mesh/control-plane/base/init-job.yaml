@@ -89,4 +89,4 @@ spec:
         configMap:
           name: mounting-configmap
       restartPolicy: Never
-      serviceAccountName: init-job-serviceaccount
+      serviceAccountName: init-job-executor
