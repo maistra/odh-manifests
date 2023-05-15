@@ -20,8 +20,8 @@ configMapGenerator:
       - resource-templates/gateway-route.yaml
       - resource-templates/authconfig.yaml
       - resource-templates/patch-dashboard-config.yaml
-      - proxy/auth-policy.yaml
-      - proxy/filter-propagate-token.yaml
+      - auth-policy.yaml
+      - filter-propagate-token.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
