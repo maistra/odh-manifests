@@ -28,14 +28,6 @@ spec:
             export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
             export OAUTH_ROUTE=$(echo $endpoint | jq .issuer | sed 's/"//g; s/https:\/\///g') # remove quotes and https
 
-            echo $TOKEN_ENDPOINT
-            echo $AUTH_ENDPOINT
-            echo $OAUTH_ROUTE
-
-            # tmp
-            echo $CLIENT_SECRET
-            echo $HMAC_SECRET
-
             apply_yaml() {
               filename="$1"
 
