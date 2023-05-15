@@ -9,7 +9,7 @@ metadata:
     maistra.io/gateway-name: odh-gateway
     maistra.io/gateway-namespace: opendatahub
 spec:
-  host: opendatahub-odh-gateway-istio-system.$DOMAIN
+  host: opendatahub.$DOMAIN
   to:
     kind: Service
     name: istio-ingressgateway
