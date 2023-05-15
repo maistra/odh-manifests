@@ -32,7 +32,7 @@ spec:
               filename="$1"
 
               case "$filename" in
-                "/etc/cfg-map/authconfig.yaml" | "/etc/cfg-map/patch-dashboard-config.yaml")
+                "/etc/cluster-resources/authconfig.yaml" | "/etc/cluster-resources/patch-dashboard-config.yaml")
                   namespace="opendatahub"
                   ;;
                 *)
@@ -60,7 +60,7 @@ spec:
             done 
 
             # iterate over all files in the subdirectory
-            for filename in /etc/cfg-map/*
+            for filename in /etc/cluster-resources/*
             do
               apply_yaml "$filename"
             done
@@ -70,10 +70,10 @@ spec:
             
         volumeMounts:
           - name: config-volume
-            mountPath: /etc/cfg-map
+            mountPath: /etc/cluster-resources
       volumes:
       - name: config-volume
         configMap:
-          name: mounting-configmap
+          name: cluster-resources
       restartPolicy: Never
       serviceAccountName: init-job-executor

@@ -12,7 +12,7 @@ resources:
 - init-job-rbac/job-sa.yaml
 
 configMapGenerator:
-  - name: mounting-configmap
+  - name: cluster-resources
     files:
       - resource-templates/filter-oauth2.yaml
       - resource-templates/oauth-configmap.yaml
