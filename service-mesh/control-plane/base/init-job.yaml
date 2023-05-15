@@ -65,7 +65,17 @@ spec:
               apply_yaml "$filename"
             done
 
-            kubectl rollout restart deployment -n istio-system istio-ingressgateway
+            # Ensure secrets are mounted in ingress-gateway. If not, restart the pod.
+            kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
+
+            if kubectl exec $(kubectl get pods -n istio-system \
+              -l app=istio-egressgateway \
+              -o jsonpath='{.items[*].metadata.name}') \
+              -n istio-system \
+              -c istio-proxy -- ls -al /etc/istio/odh-oauth2 2>&1 | grep -q 'No such file or directory'; then
+              # If we don't see the secrets mounted, restart deployment.
+              kubectl rollout restart deployment -n istio-system istio-ingressgateway
+            fi
             exit 0
             
         volumeMounts:
