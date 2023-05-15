@@ -40,11 +40,7 @@ spec:
                   ;;
               esac
 
-              # Read in the contents of the YAML file
-              yaml=$(cat "$filename")
-
-              # Apply the substituted YAML using kubectl
-              echo "$yaml" | envsubst | kubectl apply -n $namespace -f -
+              cat "$filename" | envsubst | kubectl apply -n $namespace -f -
             }
 
             # wait for app to be ready
