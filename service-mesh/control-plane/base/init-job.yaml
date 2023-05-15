@@ -20,8 +20,8 @@ spec:
             curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
             export PATH=/tmp/bin:$PATH
 
-            export CLIENTS_SECRET=$(openssl rand -hex 32)
-            export HMACS_SECRET=$(openssl rand -hex 32)
+            export CLIENT_SECRET=$(openssl rand -hex 32)
+            export HMAC_SECRET=$(openssl rand -hex 32)
             export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
             echo $DOMAIN
             endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
@@ -34,8 +34,8 @@ spec:
             echo $OAUTH_ROUTE
 
             # tmp
-            echo $CLIENTS_SECRET
-            echo $HMACS_SECRET
+            echo $CLIENT_SECRET
+            echo $HMAC_SECRET
 
             apply_yaml() {
               filename="$1"

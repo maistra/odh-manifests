@@ -10,11 +10,11 @@ data:
       name: token
       generic_secret:
         secret:
-          inline_string: "$CLIENTS_SECRET" 
+          inline_string: "$CLIENT_SECRET" 
   hmac-secret.yaml: |-
     resources:
     - "@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret"
       name: hmac
       generic_secret:
         secret:
-          inline_bytes: "$HMACS_SECRET"
+          inline_bytes: "$HMAC_SECRET"

@@ -7,7 +7,6 @@ metadata:
     authorino/topic: odh
 spec:
   hosts:
-  # TODO:HARDCODED - WILL ONLY WORK ON CRC.
   - "opendatahub-odh-gateway-istio-system.$DOMAIN"
   identity:
   - name: kubernetes-users
