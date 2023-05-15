@@ -11,18 +11,6 @@ resources:
 - init-job-rbac/job-rolebinding.yaml
 - init-job-rbac/job-sa.yaml
 
-patches:
-- path: patch-control-plane-mount-oauth2-secrets.yaml
-  target:
-    kind: ServiceMeshControlPlane
-    name: basic
-    namespace: istio-system
-- path: patch-control-plane-external-provider.yaml
-  target:
-    kind: ServiceMeshControlPlane
-    name: basic
-    namespace: istio-system
-
 configMapGenerator:
   - name: mounting-configmap
     files:
