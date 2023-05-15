@@ -4,5 +4,5 @@ metadata:
  name: odh
 secret: "$CLIENT_SECRET" # gitleaks:allow
 redirectURIs:
-- "https://opendatahub-odh-gateway-istio-system.$DOMAIN"
+- "https://opendatahub.$DOMAIN"
 grantMethod: prompt

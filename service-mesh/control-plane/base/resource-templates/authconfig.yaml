@@ -7,7 +7,7 @@ metadata:
     authorino/topic: odh
 spec:
   hosts:
-  - "opendatahub-odh-gateway-istio-system.$DOMAIN"
+  - "opendatahub.$DOMAIN"
   identity:
   - name: kubernetes-users
     kubernetes:
