@@ -32,7 +32,7 @@ rules:
       - get
       - update
   - apiGroups:
-      - "security.istio.io"
+      - security.istio.io
     resources:
       - authorizationpolicies
     verbs:
