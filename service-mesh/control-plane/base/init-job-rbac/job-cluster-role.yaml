@@ -9,6 +9,7 @@ rules:
       - configmaps
       - pods
       - pods/log
+      - pods/exec
     verbs:
       - create
       - delete
