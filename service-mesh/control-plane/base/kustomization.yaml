@@ -4,7 +4,6 @@ namespace: istio-system
 # Expects maistra-operator to be installed 
 resources:
 - namespace.yaml
-- cert-secret.yaml
 - control-plane.yaml
 - init-job.yaml
 - init-job-rbac/job-cluster-role.yaml
