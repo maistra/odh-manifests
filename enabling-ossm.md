@@ -57,6 +57,8 @@ Install required operators
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
+Note that you may need to go into the `Installed Operators` tab in the console to manually finalize the install of the authorino operator.
+
 ## Setting up Open Data Hub Project
 
 ### Create Kubeflow Definition
