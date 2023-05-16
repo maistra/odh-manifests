@@ -1,0 +1,89 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: odh-ossm-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: odh-ossm-init-job
+        image: quay.io/openshift/origin-cli
+        command: ["/bin/bash", "-c", "--"]
+        args:
+          - |
+            mkdir /tmp/bin
+
+            # install jq for json parsing. 
+            curl -L https://stedolan.github.io/jq/download/linux64/jq  -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
+
+            # install envsubst 
+            curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
+            export PATH=/tmp/bin:$PATH
+
+            export CLIENT_SECRET=$(openssl rand -hex 32)
+            export HMAC_SECRET=$(openssl rand -hex 32)
+            export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
+            endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
+            export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
+            export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
+            export OAUTH_ROUTE=$(echo $endpoint | jq .issuer | sed 's/"//g; s/https:\/\///g') # remove quotes and https
+
+            apply_yaml() {
+              filename="$1"
+
+              case "$filename" in
+                "/etc/cluster-resources/authconfig.yaml" | "/etc/cluster-resources/patch-dashboard-config.yaml")
+                  namespace="opendatahub"
+                  ;;
+                *)
+                  namespace="istio-system"
+                  ;;
+              esac
+
+              cat "$filename" | envsubst | kubectl apply -n $namespace -f -
+            }
+
+            # wait for app to be ready
+            echo "waiting for SMCP to be ready"
+            kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=180s
+
+            # wait for odh-dashboard to create ODHDashboardConfig in opendatahub ns
+            while true; do
+              # check if the resource exists
+              if kubectl get odhdashboardconfig odh-dashboard-config -n opendatahub >/dev/null 2>&1; then
+                echo "Resource ODHDashboardconfig found in namespace opendatahub"
+                break
+              fi
+
+              # wait for the interval before checking again
+              sleep 5
+            done 
+
+            # iterate over all files in the subdirectory
+            for filename in /etc/cluster-resources/*
+            do
+              apply_yaml "$filename"
+            done
+
+            # Ensure secrets are mounted in ingress-gateway. If not, restart the pod.
+            kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
+
+            if kubectl exec $(kubectl get pods -n istio-system \
+              -l app=istio-egressgateway \
+              -o jsonpath='{.items[*].metadata.name}') \
+              -n istio-system \
+              -c istio-proxy -- ls -al /etc/istio/odh-oauth2 2>&1 | grep -q 'No such file or directory'; then
+              # If we don't see the secrets mounted, restart deployment.
+              kubectl rollout restart deployment -n istio-system istio-ingressgateway
+            fi
+            exit 0
+            
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cluster-resources
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cluster-resources
+      restartPolicy: Never
+      serviceAccountName: init-job-executor

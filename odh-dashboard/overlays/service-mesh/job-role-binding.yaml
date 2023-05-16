@@ -1,12 +1,13 @@
-kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
-  name: auth-service
-  namespace: $AUTH_NS
+  name: job-rolebinding
+  namespace: opendatahub
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: auth-service
+  name: init-job-role
 subjects:
   - kind: ServiceAccount
-    name: auth-service
+    name: init-job-executor
+    namespace: istio-system

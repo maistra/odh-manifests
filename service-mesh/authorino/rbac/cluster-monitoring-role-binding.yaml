@@ -1,8 +1,8 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: auth-service
-  namespace: $AUTH_NS
+  name: auth-service-monitoring
+  namespace: auth-provider
 subjects:
   - kind: ServiceAccount
     name: auth-service
@@ -10,4 +10,4 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: auth-service
+  name: cluster-monitoring-view
