@@ -3,3 +3,4 @@ kfdef/kustomize/
 tests/kubeconfig
 tests/artifacts
 .idea
+.DS_STORE

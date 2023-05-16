@@ -4,7 +4,7 @@ metadata:
   labels:
     opendatahub.io/notebook-image: "true"
   annotations:
-    opendatahub.io/notebook-image-url: "https://github.com//opendatahub-io/notebooks/tree/main/jupyter/datascience/ubi8-python-3.8"
+    opendatahub.io/notebook-image-url: "https://github.com//opendatahub-io/notebooks/tree/main/jupyter/datascience"
     opendatahub.io/notebook-image-name: "Jupyter Data Science"
     opendatahub.io/notebook-image-desc: "Jupyter notebook image with a set of data science libraries that advanced AI/ML notebooks will use as a base image to provide a standard for libraries avialable in all notebooks"
     opendatahub.io/notebook-image-order: "2"
@@ -13,6 +13,19 @@ spec:
   lookupPolicy:
     local: true
   tags:
+  # N Version of the image
+  - annotations:
+      opendatahub.io/notebook-software: '[{"name":"Python","version":"v3.9"}]'
+      opendatahub.io/notebook-python-dependencies: '[{"name":"Boto3","version":"1.26"},{"name":"Kafka-Python","version":"2.0"},{"name":"Kfp-tekton","version":"1.5"},{"name":"Matplotlib","version":"3.6"},{"name":"Numpy","version":"1.24"},{"name":"Pandas","version":"1.5"},{"name":"Scikit-learn","version":"1.2"},{"name":"Scipy","version":"1.10"}]'
+      openshift.io/imported-from: quay.io/opendatahub/workbench-images
+      opendatahub.io/workbench-image-recommended: 'true'
+    from:
+      kind: DockerImage
+      name: quay.io/opendatahub/workbench-images:jupyter-datascience-ubi9-python-3.9-2023a-weekly
+    name: "2023.1"
+    referencePolicy:
+      type: Local
+  # N-1 Version of the image
   - annotations:
       opendatahub.io/notebook-software: '[{"name":"Python","version":"v3.8"}]'
       opendatahub.io/notebook-python-dependencies: '[{"name":"Boto3","version":"1.17"},{"name":"Kafka-Python","version":"2.0"},{"name":"Matplotlib","version":"3.4"},{"name":"Numpy","version":"1.19"},{"name":"Pandas","version":"1.2"},{"name":"Scikit-learn","version":"0.24"},{"name":"Scipy","version":"1.6"}]'
@@ -20,6 +33,6 @@ spec:
     from:
       kind: DockerImage
       name: quay.io/opendatahub/notebooks@sha256:5df71f5542d2e0161f0f4342aa9a390679d72dc6fae192fd8da1e5671b27e8d4
-    name: "py3.8-v1"
+    name: "1.2"
     referencePolicy:
-      type: Source
+      type: Local

@@ -63,15 +63,10 @@ spec:
         path: modelmesh-monitoring
     name: modelmesh-monitoring
   - kustomizeConfig:
-      overlays:
-        - metadata-store-mariadb
-        - ds-pipeline-ui
-        - object-store-minio
-        - default-configs
       repoRef:
         name: manifests
-        path: data-science-pipelines
-    name: data-science-pipelines
+        path: data-science-pipelines-operator/
+    name: data-science-pipelines-operator
   repos:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master

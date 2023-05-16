@@ -1,0 +1,43 @@
+---
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  name: jupyter-trustyai-ubi9-python-3-9
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - name: jupyter-trustyai-ubi9-python-3-9
+          image: image-registry.openshift-image-registry.svc:5000/opendatahub/jupyter-trustyai-notebook:2023.1
+          imagePullPolicy: Always
+          workingDir: /opt/app-root/src
+          env:
+            - name: NOTEBOOK_ARGS
+              value: |
+                --ServerApp.port=8888
+                --ServerApp.token=''
+                --ServerApp.password=''
+                --ServerApp.base_url=/notebook/opendatahub/jupyter-trustyai-ubi9-python-3-9
+          ports:
+            - name: notebook-port
+              containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              scheme: HTTP
+              path: /notebook/opendatahub/jupyter-trustyai-ubi9-python-3-9/api
+              port: notebook-port

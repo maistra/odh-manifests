@@ -4,23 +4,18 @@ metadata:
   name: controller-manager
   namespace: datasciencepipelinesapplications-controller
   labels:
-    control-plane: controller-manager
-    app.kubernetes.io/name: deployment
-    app.kubernetes.io/instance: controller-manager
-    app.kubernetes.io/component: manager
-    app.kubernetes.io/created-by: data-science-pipelines-operator
-    app.kubernetes.io/part-of: data-science-pipelines-operator
+    app.kubernetes.io/name: data-science-pipelines-operator
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
-  replicas: 3
+      app.kubernetes.io/name: data-science-pipelines-operator
+  replicas: 1
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
       labels:
-        control-plane: controller-manager
+        app.kubernetes.io/name: data-science-pipelines-operator
     spec:
       securityContext:
         runAsNonRoot: true
@@ -47,8 +42,6 @@ spec:
             value: $(IMAGES_PERSISTENTAGENT)
           - name: IMAGES_SCHEDULEDWORKFLOW
             value: $(IMAGES_SCHEDULEDWORKFLOW)
-          - name: IMAGES_VIEWERCRD
-            value: $(IMAGES_VIEWERCRD)
           - name: IMAGES_CACHE
             value: $(IMAGES_CACHE)
           - name: IMAGES_MOVERESULTSIMAGE
@@ -75,10 +68,10 @@ spec:
         resources:
           limits:
             cpu: 1
-            memory: 2Gi
+            memory: 4Gi
           requests:
-            cpu: 1
-            memory: 2Gi
+            cpu: 10m
+            memory: 64Mi
         volumeMounts:
           - mountPath: /home/config
             name: config

@@ -14,7 +14,6 @@ Open Data Hub is an end-to-end AI/ML platform on top of OpenShift Container Plat
 
 * [ODH Dashboard](odh-dashboard/README.md)
 * [ODH Notebook Controller](odh-notebook-controller/README.md)
-* [Data Science Pipelines](data-science-pipelines/README.md)
 * [ModelMesh](model-mesh/README.md)
 
 

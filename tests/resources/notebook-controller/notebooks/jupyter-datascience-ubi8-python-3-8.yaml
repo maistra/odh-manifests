@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: jupyter-datascience-ubi8-python-3-8
-          image: image-registry.openshift-image-registry.svc:5000/opendatahub/jupyter-datascience-notebook:py3.8-v1
+          image: image-registry.openshift-image-registry.svc:5000/opendatahub/jupyter-datascience-notebook:1.2
           imagePullPolicy: Always
           workingDir: /opt/app-root/src
           env:

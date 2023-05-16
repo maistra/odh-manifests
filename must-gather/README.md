@@ -9,7 +9,7 @@ The must-gather script currently collects data from all the namespaces that has 
 - `KfDef` instances
 - `Notebook` instances
 - `Inferenceservice` instances
-
+- `DataSciencePipelinesApplication` instances
 
 ## Usage
 

@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: cuda-jupyter-pytorch-ubi8-python-3-8
-          image: image-registry.openshift-image-registry.svc:5000/opendatahub/jupyter-pytorch-notebook:py3.8-v1
+          image: image-registry.openshift-image-registry.svc:5000/opendatahub/jupyter-pytorch-notebook:1.2-cuda-11.4
           imagePullPolicy: Always
           workingDir: /opt/app-root/src
           env:

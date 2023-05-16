@@ -4,7 +4,7 @@ metadata:
   labels:
     opendatahub.io/notebook-image: "true"
   annotations:
-    opendatahub.io/notebook-image-url: "https://github.com/opendatahub-io/notebooks/tree/main/jupyter/minimal/ubi8-python-3.8"
+    opendatahub.io/notebook-image-url: "https://github.com/opendatahub-io/notebooks/tree/main/jupyter/minimal"
     opendatahub.io/notebook-image-name: "CUDA"
     opendatahub.io/notebook-image-desc: "Jupyter notebook image with GPU support and minimal dependency set to start experimenting with Jupyter environment."
     opendatahub.io/notebook-image-order: "3"
@@ -13,6 +13,19 @@ spec:
   lookupPolicy:
     local: true
   tags:
+  # N Version of the image
+  - annotations:
+        opendatahub.io/notebook-software: '[{"name":"Python","version":"v3.9"}]'
+        opendatahub.io/notebook-python-dependencies: '[{"name":"JupyterLab","version":"3.5"},{"name":"Notebook","version":"6.5"}]'
+        openshift.io/imported-from: quay.io/opendatahub/workbench-images
+        opendatahub.io/workbench-image-recommended: 'true'
+    from:
+      kind: DockerImage
+      name: quay.io/opendatahub/workbench-images:cuda-jupyter-minimal-ubi9-python-3.9-2023a-weekly
+    name: "2023.1-cuda-11.8"
+    referencePolicy:
+      type: Local
+  # N-1 Version of the image
   - annotations:
         opendatahub.io/notebook-software: '[{"name":"Python","version":"v3.8"}]'
         opendatahub.io/notebook-python-dependencies: '[{"name":"JupyterLab","version":"3.2"},{"name":"Notebook","version":"6.4"}]'
@@ -20,6 +33,6 @@ spec:
     from:
       kind: DockerImage
       name: quay.io/opendatahub/notebooks@sha256:c13cd3410e31184986d44d36ba663ca2f2225d14e5b086b09fe221219a94b6de
-    name: "py3.8-v1"
+    name: "1.2-cuda-11.4"
     referencePolicy:
       type: Local

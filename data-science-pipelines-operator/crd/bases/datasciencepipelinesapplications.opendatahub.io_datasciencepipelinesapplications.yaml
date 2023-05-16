@@ -72,6 +72,9 @@ spec:
                   enableOauth:
                     default: true
                     type: boolean
+                  enableSamplePipeline:
+                    default: true
+                    type: boolean
                   image:
                     type: string
                   injectDefaultScript:
@@ -308,10 +311,12 @@ spec:
                         type: object
                       scheme:
                         type: string
+                      secure:
+                        default: true
+                        type: boolean
                     required:
                     - bucket
                     - host
-                    - port
                     - s3CredentialsSecret
                     - scheme
                     type: object
@@ -451,56 +456,6 @@ spec:
                     type: boolean
                   image:
                     type: string
-                  resources:
-                    description: ResourceRequirements structures compute resource
-                      requirements. Replaces ResourceRequirements from corev1 which
-                      also includes optional storage field. We handle storage field
-                      separately, and should not include it as a subfield for Resources.
-                    properties:
-                      limits:
-                        properties:
-                          cpu:
-                            anyOf:
-                            - type: integer
-                            - type: string
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
-                          memory:
-                            anyOf:
-                            - type: integer
-                            - type: string
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
-                        type: object
-                      requests:
-                        properties:
-                          cpu:
-                            anyOf:
-                            - type: integer
-                            - type: string
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
-                          memory:
-                            anyOf:
-                            - type: integer
-                            - type: string
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
-                        type: object
-                    type: object
-                type: object
-              viewerCRD:
-                default:
-                  deploy: false
-                properties:
-                  deploy:
-                    default: false
-                    type: boolean
-                  image:
-                    type: string
-                  maxNumViewer:
-                    default: 50
-                    type: integer
                   resources:
                     description: ResourceRequirements structures compute resource
                       requirements. Replaces ResourceRequirements from corev1 which

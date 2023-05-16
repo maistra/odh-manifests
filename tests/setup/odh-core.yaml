@@ -3,6 +3,7 @@ apiVersion: kfdef.apps.kubeflow.org/v1
 kind: KfDef
 metadata:
   name: odh-core
+  namespace: opendatahub
 spec:
   applications:
   - kustomizeConfig:
@@ -10,14 +11,6 @@ spec:
         name: manifests
         path: odh-common
     name: odh-common
-  - kustomizeConfig:
-      parameters:
-        - name: namespace
-          value: openshift-operators
-      repoRef:
-        name: manifests
-        path: openshift-pipelines/cluster
-    name: openshift-pipelines
   - kustomizeConfig:
       repoRef:
         name: manifests
@@ -54,16 +47,6 @@ spec:
         path: notebook-images
     name: notebook-images
   - kustomizeConfig:
-      overlays:
-        - metadata-store-mariadb
-        - ds-pipeline-ui
-        - object-store-minio
-        - default-configs
-      repoRef:
-        name: manifests
-        path: data-science-pipelines
-    name: data-science-pipelines
-  - kustomizeConfig:
       parameters:
       - name: monitoring-namespace
         value: opendatahub
@@ -91,6 +74,16 @@ spec:
         name: manifests
         path: data-science-pipelines-operator/
     name: data-science-pipelines-operator
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: codeflare-stack
+    name: codeflare-stack
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: ray/operator
+    name: ray-operator
   repos:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master

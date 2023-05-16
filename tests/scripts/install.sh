@@ -27,7 +27,33 @@ else
     sleep 1m
   done
 fi
+
+# Update Install Plan of opendatahub-operator to Automatic. It is set to manual if deployed in openshift-ci
+oc patch installplan $(oc get installplan -l operators.coreos.com/opendatahub-operator.openshift-operators -n openshift-operators -o jsonpath="{$.items[*].metadata.name}") \
+   --namespace openshift-operators \
+    --type merge \
+    --patch '{"spec":{"approval":"Automatic"}}'
+
+# Install OpenShift Pipelines operator irrespective of SKIP_OPERATOR_INSTALL value
+echo "Installing OpenShift Pipelines operator"
+retry=5
+while [[ $retry -gt 0 ]]; do
+  ./setup.sh -o ~/peak/pipelines-op-setup 2>&1
+  if [ $? -eq 0 ]; then
+    retry=-1
+  else
+    echo "Trying restart of marketplace community operator pod"
+    oc delete pod -n openshift-marketplace $(oc get pod -n openshift-marketplace -l marketplace.operatorSource=community-operators -o jsonpath="{$.items[*].metadata.name}")
+    sleep 3m
+  fi
+  retry=$(( retry - 1))
+  sleep 1m
+done
+
 popd
+## Install CodFlare Operator
+echo "Installing CodeFlare operator"
+oc apply -f $HOME/peak/operator-tests/odh-manifests/resources/codeflare-stack/codeflare-subscription.yaml
 ## Grabbing and applying the patch in the PR we are testing
 pushd ~/src/odh-manifests
 if [ -z "$PULL_NUMBER" ]; then

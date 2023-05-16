@@ -1,0 +1,39 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: ray-minimal
+  namespace: opendatahub
+spec:
+  applications:
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-common
+    name: odh-common
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-dashboard
+    name: odh-dashboard
+  - kustomizeConfig:
+      overlays:
+      - additional
+      repoRef:
+        name: manifests
+        path: jupyterhub/notebook-images
+    name: notebook-images
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-notebook-controller
+    name: odh-notebook-controller
+  # Ray.io
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: ray/operator
+    name: ray-operator
+  repos:
+    # ODH Core component manifests
+  - name: manifests
+    uri: https://github.com/opendatahub-io/odh-manifests/tarball/master

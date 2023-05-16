@@ -13,6 +13,8 @@ done
 ## Get Operator pod logs
 mkdir must-gather/odh-operator || echo "Error creating odh-operator directory"
 oc logs deployment/opendatahub-operator -n openshift-operators >> must-gather/odh-operator/pod.log
-
+/usr/bin/gather-data-science-pipelines
+/usr/bin/gather-model-mesh
+/usr/bin/gather-notebooks
 exit 0
 

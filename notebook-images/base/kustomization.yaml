@@ -6,6 +6,7 @@ resources:
 - jupyter-minimal-gpu-notebook-imagestream.yaml
 - jupyter-pytorch-notebook-imagestream.yaml
 - jupyter-tensorflow-notebook-imagestream.yaml
+- jupyter-trustyai-notebook-imagestream.yaml
 commonLabels:
   opendatahub.io/component: "true"
   component.opendatahub.io/name: notebooks
