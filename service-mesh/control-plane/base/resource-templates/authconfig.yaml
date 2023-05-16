@@ -2,12 +2,12 @@ apiVersion: authorino.kuadrant.io/v1beta1
 kind: AuthConfig
 metadata:
   name: odh-dashboard-protection
-  namespace: $ODH_NS
+  namespace: opendatahub  # TODO:HARDCODED
   labels:
     authorino/topic: odh
 spec:
   hosts:
-  - "${ODH_ROUTE}"
+  - "opendatahub.$DOMAIN"
   identity:
   - name: kubernetes-users
     kubernetes:
@@ -20,7 +20,7 @@ spec:
         valueFrom: { authJSON: auth.identity.username }
       resourceAttributes:
         namespace:
-          value: $ODH_NS
+          value: opendatahub # TODO:HARDCODED
         group:
           value: ""
         resource:

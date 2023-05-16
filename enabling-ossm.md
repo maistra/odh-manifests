@@ -4,18 +4,15 @@
 
 * Openshift cluster with enough karma (make sure to log in :))
 * CLI tools
-  * `kustomize` v5.0.0+
+  * `kustomize` 
   * `kubectl`
-  * `envsubst`
-  * `openssl`
-  * `jq` and `yq`
   * (until operator changes are merged) `operator-sdk` v1.24.1
 
 * Installed operators
   * Kiali
   * Jaeger
   * OSSM
-  * OpenData Hub
+  * OpenDataHub
   * Authorino
   
 ### Check if required operators are installed
@@ -24,10 +21,7 @@
 kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /opendatahub/ && /authorino/ {exit 0} {exit 1}' || echo "Please install all required operators."
 ```
 
-<details>
-  <summary>
-    Install required operators
-  </summary>
+Install required operators
 
   ```sh
   createSubscription() {
@@ -63,17 +57,6 @@ kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /ope
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
-</details>
-
-## Install Openshift Service Mesh Control Plane
-
-```sh
-until kubectl get crd servicemeshcontrolplanes.maistra.io  >/dev/null 2>&1; do  echo 'Waiting for smcp CRD to appear...'; sleep 1; done
-kustomize build service-mesh/control-plane/base | kubectl apply -f -
-sleep 4 # to prevent kubectl wait from failing
-kubectl wait --for condition=Ready smcp/basic --timeout 300s -n istio-system
-```
-
 ## Setting up Open Data Hub Project
 
 ### Create Kubeflow Definition
@@ -86,6 +69,14 @@ metadata:
  name: odh-minimal
 spec:
  applications:
+ - kustomizeConfig:
+      parameters:
+        - name: namespace
+          value: istio-system
+      repoRef:
+        name: manifests
+        path: service-mesh/control-plane
+   name: control-plane
  - kustomizeConfig:
       overlays:
         - service-mesh
@@ -115,38 +106,34 @@ spec:
         name: manifests
         path: notebook-images
    name: notebook-images
+ - kustomizeConfig:
+      parameters:
+        - name: namespace
+          value: auth-provider
+      repoRef:
+        name: manifests
+        path: service-mesh/authorino
+   name: authorino
  repos:
  - name: manifests
-   uri: https://github.com/$FORK/odh-manifests/tarball/$CURRENT_BRANCH
- version: $CURRENT_BRANCH
+   uri: https://github.com/maistra/odh-manifests/tarball/maistra-dev
+ version: maistra-dev
 EOF
 ```
 
-For convenience, we can create an alias (but you have to have `git remote` named `fork` to make it working):
-
-```sh
-alias kfdef="FORK=$(git remote get-url fork | cut -d':' -f 2 | cut -d'.' -f 1 | uniq | tail -n 1 | cut -d'/' -f 1) CURRENT_BRANCH=$(git symbolic-ref --short HEAD) envsubst < odh-minimal.ign.yaml"
-```
-
-### Deployment
-
-Let's start with the namespace
+Let's start with the namespaces
 
 ```sh
 export ODH_NS=opendatahub
 kubectl create ns $ODH_NS
+kubectl create ns auth-provider
+kubectl create ns istio-system
 ```
-<!-- 
-to add the project to Service Mesh and set up the routing:
+
+Now create the KfDef resource in the opendatahub namespace. This will also create the requisite service mesh and authorino resources in their respective namespaces.
 
 ```sh
-kustomize build odh-dashboard/overlays/service-mesh | kubectl apply -f -
-``` -->
-
-and finally to create ODH project:
-
-```sh
-kubectl apply -n $ODH_NS -f - < <(kfdef)
+kubectl apply -n $ODH_NS -f odh-minimal.yaml
 kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
 kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
@@ -157,55 +144,12 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-Patch `ODHDashboardConfig` to enable Service Mesh.
-
-```sh
-kubectl patch odhdashboardconfig odh-dashboard-config -n $ODH_NS --patch-file odh-dashboard/overlays/service-mesh/patch-dashboard-config.yaml --type=merge
-```
-
-## Setting up Authorization Service
-
-```sh
-export AUTH_NS=auth-provider
-export CLIENT_SECRET=$(openssl rand -hex 32)
-export CLIENT_HMAC=$(openssl rand -hex 32)
-export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
-export OAUTH_ROUTE=$(kubectl get route --all-namespaces -l app=oauth-openshift -o yaml | yq '.items[].spec.host')
-endpoint=$(kubectl -n default run oidc-config --attach --rm --restart=Never -q --image=curlimages/curl -- https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
-export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
-export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
-kustomize build service-mesh/auth/cluster | envsubst | kubectl apply -f -
-kubectl wait --for condition=ready pod --all --timeout 360s -n $AUTH_NS
-```
-
-Check if Istio proxy is deployed. Trigger restart of deployment if that's not the case.
-
-```sh
-kubectl get pods -n $AUTH_NS -o yaml | grep -q istio-proxy || kubectl rollout restart deployment authorino -n $AUTH_NS
-```
-
-Mount OAuth2 secrets to Istio gateways (done by kustomize)
-
-<!-- ```sh
-kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-mount-oauth2-secrets.yaml --type=merge
-``` -->
-
-You can validate if the secrets are mounted by executing (it might take some time for pod to show up with updated config):
-
-```sh
-kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n istio-system
-kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- ls -al /etc/istio/odh-oauth2
-```
-<!-- 
-Register [external authz provider](https://istio.io/latest/docs/tasks/security/authorization/authz-custom/) in Service Mesh:
-
-```sh
-kubectl patch smcp/basic -n istio-system --patch-file service-mesh/auth/mesh/patch-control-plane-external-provider.yaml --type=merge
-``` -->
 
 Now you can open Open Data Hub dashboard in the browser:
 
 ```sh
+export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name=odh-gateway -o yaml | yq '.items[].spec.host')
+
 xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &    
 ```
 

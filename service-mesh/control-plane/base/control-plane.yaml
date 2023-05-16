@@ -29,3 +29,25 @@ spec:
     kiali:
       enabled: true
       name: kiali
+  gateways:
+    # no need to use IOR -
+    # To be deprecated and we create the route manually
+    openshiftRoute:
+      enabled: false
+    ingress:
+      volumes:
+        - volume:
+            configMap:
+              name: istio-odh-oauth2
+              optional: true
+          volumeMount:
+            name: odh-oauth2-tokens
+            mountPath: "/etc/istio/odh-oauth2"
+            readOnly: true
+  techPreview:
+    meshConfig:
+      extensionProviders:
+      - name: odh-auth-provider
+        envoyExtAuthzGrpc:
+          service: authorino-authorino-authorization.auth-provider.svc.cluster.local
+          port: 50051
