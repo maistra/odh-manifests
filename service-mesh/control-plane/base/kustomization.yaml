@@ -21,6 +21,7 @@ configMapGenerator:
       - resource-templates/patch-dashboard-config.yaml
       - auth-policy.yaml
       - filter-propagate-token.yaml
+      - cert-secret.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
