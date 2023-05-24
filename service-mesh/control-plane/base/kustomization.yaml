@@ -9,6 +9,7 @@ resources:
 - init-job-rbac/job-cluster-role.yaml
 - init-job-rbac/job-rolebinding.yaml
 - init-job-rbac/job-sa.yaml
+- cert-secret.yaml
 
 configMapGenerator:
   - name: cluster-resources
@@ -21,7 +22,6 @@ configMapGenerator:
       - resource-templates/patch-dashboard-config.yaml
       - auth-policy.yaml
       - filter-propagate-token.yaml
-      - cert-secret.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
