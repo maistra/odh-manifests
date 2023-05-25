@@ -1,16 +1,16 @@
 # Each list is sorted alphabetically, additions should maintain that order
 approvers:
 - anishasthana
+- aslakknutsen
 - bartoszmajsak
 - cam-garrison
-- InnocentK
 - lavlas
 - VaishnaviHire
 
 reviewers:
 - anishasthana
+- aslakknutsen
 - bartoszmajsak
 - cam-garrison
-- InnocentK
 - lavlas
 - VaishnaviHire
