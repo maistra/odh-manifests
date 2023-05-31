@@ -14,7 +14,7 @@ spec:
             mkdir /tmp/bin
 
             # install jq for json parsing. 
-            curl -L https://stedolan.github.io/jq/download/linux64/jq  -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
+            curl -L https://github.com/jqlang/jq/releases/download/jq-1.6/jq-linux64  -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
 
             # install envsubst 
             curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
