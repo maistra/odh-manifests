@@ -6,7 +6,7 @@ commonLabels:
 bases:
   - ../apps
   - ../modelserving
-  - ../overlays/service-mesh
+
 resources:
 - role.yaml
 - cluster-role.yaml
@@ -18,11 +18,15 @@ resources:
 - deployment.yaml
 - routes.yaml
 - service.yaml
+- oauth.secret.yaml
 - fetch-builds-and-images.rbac.yaml
 - image-puller.clusterrolebinding.yaml
 - model-serving-role.yaml
 - model-serving-role-binding.yaml
 images:
 - name: odh-dashboard
-  newName: quay.io/maistra-dev/odh-dashboard
-  newTag: ossm_annotations
+  newName: quay.io/opendatahub/odh-dashboard
+  newTag: v2.9.3
+- name: oauth-proxy
+  newName: registry.redhat.io/openshift4/ose-oauth-proxy
+  newTag: v4.8

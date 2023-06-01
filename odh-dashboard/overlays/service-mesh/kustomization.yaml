@@ -5,3 +5,37 @@ resources:
 - virtual-service.yaml
 - job-role.yaml
 - job-role-binding.yaml
+- ../../base
+
+patchesStrategicMerge:
+- patches/oauth-client-patch.yaml
+- patches/oauth-config-patch.yaml
+
+patches:
+- path: patches/route-patch.yaml
+  target:
+    group: route.openshift.io
+    version: v1
+    kind: Route
+    name: odh-dashboard
+- path: patches/service-patch.yaml
+  target:
+    version: v1
+    kind: Service
+    name: odh-dashboard
+- path: patches/service-account-patch.yaml
+  target:
+    version: v1
+    kind: ServiceAccount
+    name: odh-dashboard
+- path: patches/deployment-patch.yaml
+  target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: odh-dashboard
+
+images:
+- name: odh-dashboard
+  newName: quay.io/maistra-dev/odh-dashboard
+  newTag: ossm_annotations
