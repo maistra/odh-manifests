@@ -118,8 +118,8 @@ spec:
    name: authorino
  repos:
  - name: manifests
-   uri: https://github.com/maistra/odh-manifests/tarball/maistra-dev
- version: maistra-dev
+   uri: https://github.com/maistra/odh-manifests/tarball/service-mesh-integration
+ version: service-mesh-integration
 EOF
 ```
 
