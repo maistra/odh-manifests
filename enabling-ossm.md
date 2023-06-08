@@ -135,7 +135,7 @@ kubectl create ns istio-system
 Now create the KfDef resource in the opendatahub namespace. This will also create the requisite service mesh and authorino resources in their respective namespaces.
 
 ```sh
-kubectl apply -n $ODH_NS -f odh-minimal.yaml
+kubectl apply -n $ODH_NS -f odh-minimal.ign.yaml
 kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
 kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
