@@ -15,3 +15,9 @@ spec:
       credentialName: odh-dashboard-cert
     hosts:
     - "*"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"

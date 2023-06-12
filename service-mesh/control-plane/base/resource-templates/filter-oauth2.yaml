@@ -79,3 +79,12 @@ spec:
           auth_scopes:
             - user:full
           forward_bearer_token: true 
+          # FIXME: This always bypasses authN for ModelMesh. It should not if
+          # the model is flagged to be auth-protected.
+          pass_through_matcher:
+          - name: ":path"
+            prefix_match: "/modelmesh/"
+          - name: ":path"
+            prefix_match: "/vmodel-route/"
+          - name: content-type
+            prefix_match: application/grpc
