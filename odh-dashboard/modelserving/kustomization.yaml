@@ -4,4 +4,4 @@ commonLabels:
   app: odh-dashboard
   app.kubernetes.io/part-of: odh-dashboard
 resources:
-  -  servingruntimes-config.yaml
+  - servingruntimes-config.yaml

@@ -4,5 +4,6 @@ resources:
   - ../default
 images:
   - name: quay.io/opendatahub/odh-notebook-controller
-    newName: quay.io/opendatahub/odh-notebook-controller
-    newTag: v1.6.1-2
+    ## FIXME: Temporary until PR is merged upstream
+    newName: quay.io/maistra-dev/odh-notebook-controller
+    newTag: enable_ossm

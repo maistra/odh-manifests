@@ -24,6 +24,7 @@ rules:
       - odhdashboardconfigs
     verbs:
       - get
+      - create
       - list
       - update
       - patch
