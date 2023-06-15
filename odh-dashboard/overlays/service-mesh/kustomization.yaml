@@ -9,6 +9,7 @@ resources:
 - virtual-service.yaml
 - smm.yaml
 - job-role-binding.yaml
+- job-role.yaml
 
 
 patchesStrategicMerge:
