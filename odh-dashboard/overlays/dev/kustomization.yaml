@@ -11,8 +11,3 @@ patchesJson6902:
     version: v1
     kind: Deployment
     name: odh-dashboard
-
-images:
-- name: odh-dashboard
-  newName: quay.io/maistra-dev/odh-dashboard
-  newTag: ossm_annotations
