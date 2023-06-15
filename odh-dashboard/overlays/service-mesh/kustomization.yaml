@@ -46,9 +46,4 @@ patchesJson6902:
     version: v1
     kind: Deployment
     name: odh-dashboard
-- path: patches/role-patch.yaml
-  target:
-    group: rbac.authorization.k8s.io
-    version: v1
-    kind: ClusterRole
-    name: manager-role
+
