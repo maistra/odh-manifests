@@ -1,0 +1,7 @@
+# DO NOT DELETE. Check README in overlays/service-mesh
+$patch: delete
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dashboard-oauth-client
+  namespace: opendatahub
