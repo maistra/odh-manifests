@@ -89,11 +89,17 @@ spec:
  - kustomizeConfig:
       overlays:
         - service-mesh
+      parameters:
+        - name: odh-dashboard
+          value: quay.io/maistra-dev/odh-dashboard:ossm_annotations
       repoRef:
         name: manifests
         path: odh-dashboard
    name: odh-dashboard
  - kustomizeConfig:
+      parameters:
+      - name: quay.io/opendatahub/odh-notebook-controller
+        value: quay.io/maistra-dev/odh-notebook-controller:enable_ossm
       repoRef:
         name: manifests
         path: odh-notebook-controller

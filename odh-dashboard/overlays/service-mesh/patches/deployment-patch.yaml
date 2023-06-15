@@ -1,16 +1,3 @@
-# these three replaces are for testing on less powerful clusters (crc)
-- op: replace
-  path: /spec/replicas
-  value: 1
-
-- op: replace
-  path: /spec/template/spec/containers/0/livenessProbe/periodSeconds
-  value: 300
-
-- op: replace
-  path: /spec/template/spec/containers/0/readinessProbe/periodSeconds
-  value: 300
-
 # remove the oauth proxy container. NOTE: this will break if another container is added above.
 - op: remove
   path: /spec/template/spec/containers/1
@@ -21,6 +8,6 @@
 
 # add istio inject label
 - op: add
-  path: /spec/template/metadata/labels/-
+  path: /spec/template/metadata/annotations
   value:
     sidecar.istio.io/inject: "true"
