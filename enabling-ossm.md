@@ -185,9 +185,9 @@ On every change in the repo, create a bundle and update `KfDef` manifest using n
 #!/bin/bash
 
 TARBALL_DIR=/tmp/odh
-mkdir -p ${TARBALL_DIR}
 
-rm -rf ${TARBALL_DIR}
+rm -rf "${TARBALL_DIR}"
+mkdir -p ${TARBALL_DIR}
 
 git add .
 
@@ -196,7 +196,6 @@ ABBREV_HASH=${HASH:0:4}
 git archive --format=tar.gz --worktree-attributes -o ${TARBALL_DIR}/odh-${ABBREV_HASH}.tar.gz --prefix=odh-${ABBREV_HASH}/ ${HASH}
 
 ip_address=$(ifconfig wlp3s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-
 sed -i'' -e 's,uri: .*,uri: '"http://${ip_address}:9898/odh-${ABBREV_HASH}.tar.gz"',' odh-mesh.ign.yaml
 ```
 
