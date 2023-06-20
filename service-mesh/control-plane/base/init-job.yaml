@@ -32,7 +32,7 @@ spec:
               filename="$1"
 
               case "$filename" in
-                "/etc/cluster-resources/authconfig.yaml" | "/etc/cluster-resources/patch-dashboard-config.yaml")
+                "/etc/cluster-resources/authconfig.yaml")
                   namespace="opendatahub"
                   ;;
                 *)

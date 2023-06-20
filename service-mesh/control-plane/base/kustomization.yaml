@@ -19,7 +19,6 @@ configMapGenerator:
       - resource-templates/oauth-client.yaml
       - resource-templates/gateway-route.yaml
       - resource-templates/authconfig.yaml
-      - resource-templates/patch-dashboard-config.yaml
       - auth-policy.yaml
       - filter-propagate-token.yaml
 

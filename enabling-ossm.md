@@ -2,9 +2,8 @@
 
 ## Prerequisites
 
-* Openshift cluster with enough karma (make sure to log in :))
+* Openshift cluster
 * CLI tools
-  * `kustomize` 
   * `kubectl`
   * (until operator changes are merged) `operator-sdk` v1.24.1
 
@@ -57,18 +56,19 @@ Install required operators
   createSubscription "authorino-operator" "community-operators" "alpha"
   ```
 
-Note that you may need to go into the `Installed Operators` tab in the console to manually finalize the install of the authorino operator.
+> ⚠️
+> Note that you may need to go into the `Installed Operators` tab in the Openshift Console to manually finalize the install of the Authorino operator.
 
 ## Setting up Open Data Hub Project
 
 ### Create Kubeflow Definition
 
 ```sh
-cat <<'EOF' > odh-minimal.ign.yaml
+cat <<'EOF' > odh-mesh.ign.yaml
 apiVersion: kfdef.apps.kubeflow.org/v1
 kind: KfDef
 metadata:
- name: odh-minimal
+ name: odh-mesh
 spec:
  applications:
  - kustomizeConfig:
@@ -138,7 +138,7 @@ kubectl create ns istio-system
 Now create the KfDef resource in the opendatahub namespace. This will also create the requisite service mesh and authorino resources in their respective namespaces.
 
 ```sh
-kubectl apply -n $ODH_NS -f odh-minimal.ign.yaml
+kubectl apply -n $ODH_NS -f odh-mesh.ign.yaml
 kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
 kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
@@ -162,7 +162,7 @@ xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &
 
 ### `OAuth flow failed`
 
-If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I seen:
+If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I've seen:
 
 ```sh
 kubectl logs $(kubectl get pod -l app=oauth-openshift -n openshift-authentication -o name) -n openshift-authentication  
