@@ -5,9 +5,9 @@ bases:
 - ../../base
 
 resources:
-- job-role.yaml
-- job-role-binding.yaml
 - dashboard-config.yaml
+- gateway.yaml
+- virtual-service.yaml
 
 patchesStrategicMerge:
 # when using bases:
