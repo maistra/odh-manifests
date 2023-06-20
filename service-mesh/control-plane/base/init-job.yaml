@@ -31,6 +31,16 @@ spec:
             apply_yaml() {
               filename="$1"
 
+              # Skip these secret files, they are used elsewhere.
+              skip_files=("/etc/cluster-resources/token-secret.yaml" "/etc/cluster-resources/hmac-secret.yaml")
+              
+              for skip_file in "${skip_files[@]}"
+              do
+                if [[ "$filename" == "$skip_file" ]]; then
+                  return 0
+                fi
+              done
+
               case "$filename" in
                 "/etc/cluster-resources/authconfig.yaml")
                   namespace="opendatahub"
@@ -42,6 +52,11 @@ spec:
 
               cat "$filename" | envsubst | kubectl apply -n $namespace -f -
             }
+            
+            # create secrets for oauth2 (formerly configmap)
+            kubectl create secret generic istio-odh-oauth2 -n istio-system \
+                --from-file=token-secret.yaml=<(envsubst < token-secret.yaml) \
+                --from-file=hmac-secret.yaml=<(envsubst < hmac-secret.yaml)
 
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
