@@ -27,12 +27,14 @@ spec:
             export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
             export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
             export OAUTH_ROUTE=$(echo $endpoint | jq .issuer | sed 's/"//g; s/https:\/\///g') # remove quotes and https
+            export TOKEN_FILEPATH="/etc/cluster-resources/token-secret.yaml"
+            export HMAC_FILEPATH="/etc/cluster-resources/hmac-secret.yaml"
 
             apply_yaml() {
               filename="$1"
 
               # Skip these secret files, they are used elsewhere.
-              skip_files=("/etc/cluster-resources/token-secret.yaml" "/etc/cluster-resources/hmac-secret.yaml")
+              skip_files=("$TOKEN_FILEPATH" "$HMAC_FILEPATH")
               
               for skip_file in "${skip_files[@]}"
               do
@@ -52,11 +54,11 @@ spec:
 
               cat "$filename" | envsubst | kubectl apply -n $namespace -f -
             }
-            
+
             # create secrets for oauth2 (formerly configmap)
             kubectl create secret generic istio-odh-oauth2 -n istio-system \
-                --from-file=token-secret.yaml=<(envsubst < token-secret.yaml) \
-                --from-file=hmac-secret.yaml=<(envsubst < hmac-secret.yaml)
+                --from-file="$TOKEN_FILEPATH"=<(envsubst < "$TOKEN_FILEPATH") \
+                --from-file="$HMAC_FILEPATH"=<(envsubst < "$HMAC_FILEPATH")
 
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
