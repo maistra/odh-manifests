@@ -57,8 +57,8 @@ spec:
 
             # create secrets for oauth2 (formerly configmap)
             kubectl create secret generic istio-odh-oauth2 -n istio-system \
-                --from-file=$TOKEN_FILEPATH=<(envsubst < $TOKEN_FILEPATH) \
-                --from-file=$HMAC_FILEPATH=<(envsubst < $HMAC_FILEPATH)
+                --from-file=token-secret.yaml=<(envsubst < $TOKEN_FILEPATH) \
+                --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
 
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
