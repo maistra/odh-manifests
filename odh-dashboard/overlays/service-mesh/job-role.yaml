@@ -2,7 +2,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: init-job-role
-  namespace: opendatahub
 # We have this role/binding for our init-job to create authconfig
 # and to patch the odhdashboardconfig in the KfDef namespace.
 rules:
