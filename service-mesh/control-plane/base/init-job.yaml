@@ -35,13 +35,7 @@ spec:
 
               # Skip these secret files, they are used elsewhere.
               skip_files=("$TOKEN_FILEPATH" "$HMAC_FILEPATH")
-              
-              for skip_file in "${skip_files[@]}"
-              do
-                if [[ "$filename" == "$skip_file" ]]; then
-                  return 0
-                fi
-              done
+              [[ " ${skip_files[*]} " =~ " ${filename} " ]] && return 0
 
               case "$filename" in
                 "/etc/cluster-resources/authconfig.yaml")
