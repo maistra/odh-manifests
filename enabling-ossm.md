@@ -2,9 +2,8 @@
 
 ## Prerequisites
 
-* Openshift cluster with enough karma (make sure to log in :))
+* Openshift cluster
 * CLI tools
-  * `kustomize` 
   * `kubectl`
   * (until operator changes are merged) `operator-sdk` v1.24.1
 
@@ -21,54 +20,54 @@
 kubectl get operators | awk -v RS= '/kiali/ && /jaeger/ && /servicemesh/ && /opendatahub/ && /authorino/ {exit 0} {exit 1}' || echo "Please install all required operators."
 ```
 
-Install required operators
+#### Installing required operators
 
-  ```sh
-  createSubscription() {
-    local name=$1
-    local source=${2:-"redhat-operators"}
-    local channel=${3:-"stable"}
+```sh
+createSubscription() {
+  local name=$1
+  local source=${2:-"redhat-operators"}
+  local channel=${3:-"stable"}
 
-    echo  "Create Subscription resource for $name"
-    eval "kubectl apply -f - <<EOF
-  apiVersion: operators.coreos.com/v1alpha1
-  kind: Subscription
-  metadata:
-    name: $name
-    namespace: openshift-operators
-  spec:
-    channel: $channel
-    installPlanApproval: Automatic
-    name: $name
-    source: $source
-    sourceNamespace: openshift-marketplace
-  EOF"    
-  }
-  ```
-  
+  echo  "Create Subscription resource for $name"
+  eval "kubectl apply -f - <<EOF
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: $name
+  namespace: openshift-operators
+spec:
+  channel: $channel
+  installPlanApproval: Automatic
+  name: $name
+  source: $source
+  sourceNamespace: openshift-marketplace
+EOF"    
+}
+```
 
-  ```sh
-  createSubscription "kiali-ossm"
-  createSubscription "jaeger-product"
-  createSubscription "servicemeshoperator"
-  # createSubscription "opendatahub-operator" "community-operators"
-  # temp, until operator changes are merged.
-  operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.2 --namespace openshift-operators --timeout 5m0s
-  createSubscription "authorino-operator" "community-operators" "alpha"
-  ```
+```sh
+createSubscription "kiali-ossm"
+createSubscription "jaeger-product"
+createSubscription "servicemeshoperator"
+# createSubscription "opendatahub-operator" "community-operators"
+# temp, until operator changes are merged.
+operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.2 --namespace openshift-operators --timeout 5m0s
+createSubscription "authorino-operator" "community-operators" "alpha"
+```
 
-Note that you may need to go into the `Installed Operators` tab in the console to manually finalize the install of the authorino operator.
+> ⚠️
+> Note that you may need to go into the `Installed Operators` tab in the Openshift Console to manually finalize the install of the Authorino operator.
 
 ## Setting up Open Data Hub Project
 
 ### Create Kubeflow Definition
 
 ```sh
-cat <<'EOF' > odh-minimal.ign.yaml
+cat <<'EOF' > odh-mesh.ign.yaml
 apiVersion: kfdef.apps.kubeflow.org/v1
 kind: KfDef
 metadata:
- name: odh-minimal
+ name: odh-mesh
 spec:
  applications:
  - kustomizeConfig:
@@ -89,11 +88,14 @@ spec:
  - kustomizeConfig:
       overlays:
         - service-mesh
+        - dev
       repoRef:
         name: manifests
         path: odh-dashboard
    name: odh-dashboard
  - kustomizeConfig:
+      overlays:
+        - service-mesh
       repoRef:
         name: manifests
         path: odh-notebook-controller
@@ -135,7 +137,7 @@ kubectl create ns istio-system
 Now create the KfDef resource in the opendatahub namespace. This will also create the requisite service mesh and authorino resources in their respective namespaces.
 
 ```sh
-kubectl apply -n $ODH_NS -f odh-minimal.ign.yaml
+kubectl apply -n $ODH_NS -f odh-mesh.ign.yaml
 kubectl wait --for condition=available kfdef --all --timeout 360s -n $ODH_NS
 kubectl wait --for condition=ready pod --all --timeout 360s -n $ODH_NS
 ```
@@ -146,7 +148,6 @@ Check if Istio proxy is deployed. Trigger restart of all deployments if that's n
 kubectl get pods -n $ODH_NS -o yaml | grep -q istio-proxy || kubectl get deployments -o name -n $ODH_NS | xargs -I {} kubectl rollout restart {} -n $ODH_NS   
 ```
 
-
 Now you can open Open Data Hub dashboard in the browser:
 
 ```sh
@@ -155,11 +156,56 @@ export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name
 xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &    
 ```
 
-## Troubleshooting
+## Tips & Tricks
+### Serving manifests locally
 
-### `OAuth flow failed`
+#### Configure `CRC` to have acces to host network
 
-If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I seen:
+```sh
+crc config set network-mode user
+crc config set host-network-access true
+crc stop -f
+crc cleanup
+crc setup
+```
+
+#### Serve bundles using HTTP server
+
+For example using `python3`:
+
+```sh
+mkdir -p /tmp/odh && python3 -m http.server 9898 --directory /tmp/odh 
+```
+
+#### Create updated bundle
+
+On every change in the repo, create a bundle and update `KfDef` manifest using new hash.
+
+```sh
+#!/bin/bash
+
+TARBALL_DIR=/tmp/odh
+
+rm -rf "${TARBALL_DIR}"
+mkdir -p ${TARBALL_DIR}
+
+git add .
+
+HASH=$([[ -z $(git status --porcelain) ]] && (git rev-parse HEAD) || (git stash create))
+ABBREV_HASH=${HASH:0:4}
+git archive --format=tar.gz --worktree-attributes -o ${TARBALL_DIR}/odh-${ABBREV_HASH}.tar.gz --prefix=odh-${ABBREV_HASH}/ ${HASH}
+
+ip_address=$(ifconfig wlp3s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+sed -i'' -e 's,uri: .*,uri: '"http://${ip_address}:9898/odh-${ABBREV_HASH}.tar.gz"',' odh-mesh.ign.yaml
+```
+
+> ⚠️  `ip_address` might need an adjustment based on your network interface name.
+
+### Troubleshooting
+
+#### `OAuth flow failed`
+
+If you see a message `OAuth flow failed` while trying to access the web app please check logs of `openshift-authentication` pod(s), this can fail for several reasons, but the most frequently I've seen:
 
 ```sh
 kubectl logs $(kubectl get pod -l app=oauth-openshift -n openshift-authentication -o name) -n openshift-authentication  
