@@ -219,8 +219,9 @@ In case of the latter check if the token is the same everywhere by comparing out
 ```sh
 kubectl get oauthclient.oauth.openshift.io odh
 kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- cat /etc/istio/odh-oauth2/token-secret.yaml
-kubectl get configmap istio-odh-oauth2 -n istio-system -o yaml
+kubectl get secret istio-odh-oauth2 -n istio-system -o yaml
 ```
+To read the actual value of secrets you could use a [`kubectl` plugin](https://github.com/elsesiy/kubectl-view-secret) instead. Then the last line would look as follows `kubectl view-secret istio-odh-oauth2 -n istio-system`.
 
 It might be that ingressgateway pod is out of sync, so restarting it might help:
 
