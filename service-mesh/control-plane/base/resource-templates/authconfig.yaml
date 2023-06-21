@@ -2,7 +2,6 @@ apiVersion: authorino.kuadrant.io/v1beta1
 kind: AuthConfig
 metadata:
   name: odh-dashboard-protection
-  namespace: opendatahub  # TODO:HARDCODED
   labels:
     authorino/topic: odh
 spec:
