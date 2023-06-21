@@ -37,8 +37,8 @@ spec:
     ingress:
       volumes:
         - volume:
-            configMap:
-              name: istio-odh-oauth2
+            secret:
+              secretName: istio-odh-oauth2
               optional: true
           volumeMount:
             name: odh-oauth2-tokens

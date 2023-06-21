@@ -15,7 +15,8 @@ configMapGenerator:
   - name: cluster-resources
     files:
       - resource-templates/filter-oauth2.yaml
-      - resource-templates/oauth-configmap.yaml
+      - resource-templates/hmac-secret.yaml
+      - resource-templates/token-secret.yaml
       - resource-templates/oauth-client.yaml
       - resource-templates/gateway-route.yaml
       - resource-templates/authconfig.yaml
