@@ -7,7 +7,6 @@ bases:
 resources:
 - gateway.yaml
 - virtual-service.yaml
-- smm.yaml
 - job-role.yaml
 - job-role-binding.yaml
 - dashboard-config.yaml
