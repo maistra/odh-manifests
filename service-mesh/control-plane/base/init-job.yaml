@@ -54,6 +54,9 @@ spec:
                 --from-file=token-secret.yaml=<(envsubst < $TOKEN_FILEPATH) \
                 --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
 
+            # add annotation to the root namespace (hardcoded pre-plugin)
+            kubectl annotate namespace opendatahub opendatahub.io/service-mesh=true
+
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
             kubectl -n istio-system wait --for=condition=Ready smcp/basic --timeout=180s          
