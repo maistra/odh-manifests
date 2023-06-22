@@ -11,6 +11,7 @@ rules:
       - pods/log
       - pods/exec
       - secrets
+      - namespaces
     verbs:
       - create
       - delete
