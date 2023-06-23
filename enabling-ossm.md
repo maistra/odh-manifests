@@ -1,6 +1,5 @@
 # Open Data Hub (ODH) Installation Guide with OpenShift Service Mesh (OSSM)
 
-
 This guide will walk you through the installation of Open Data Hub with OpenShift Service Mesh.
 
 ## Prerequisites
@@ -56,8 +55,6 @@ EOF"
 You can use the function above to install all required operators:
 
 ```sh
-createSubscription "kiali-ossm"
-createSubscription "jaeger-product"
 createSubscription "servicemeshoperator"
 # Temporarily, we use our custom operator build until operator changes are merged.
 # createSubscription "opendatahub-operator" "community-operators"
@@ -100,6 +97,35 @@ spec:
       enabled: false
 EOF
 
+
+> ⚠️
+> You have to configure Service Mesh Control Plane on your own.
+
+For example here's how you can configure minimal profile:
+
+```sh
+kubectl create ns istio-system
+kubectl apply -n istio-system -f -<<EOF
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: minimal
+spec:
+  version: v2.3
+  tracing:
+    type: None
+  addons:
+    prometheus:
+      enabled: false
+    grafana:
+      enabled: false
+    jaeger:
+      name: jaeger
+    kiali:
+      name: kiali
+      enabled: false
+EOF
+```
 
 ## Setting up Open Data Hub Project
 
