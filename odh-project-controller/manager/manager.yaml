@@ -30,6 +30,19 @@ spec:
             - name: health
               containerPort: 8081
               protocol: TCP
+          env:
+            - name: CONTROL_PLANE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: service-mesh-refs
+                  key: CONTROL_PLANE_NAME
+                  optional: true
+            - name: MESH_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: service-mesh-refs
+                  key: MESH_NAMESPACE
+                  optional: true
           livenessProbe:
             httpGet:
               path: /healthz
