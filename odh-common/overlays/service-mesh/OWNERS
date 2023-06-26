@@ -1,10 +1,10 @@
 # Each list is sorted alphabetically, additions should maintain that order
 approvers:
-- anishasthana
-- lavlas
-- VaishnaviHire
+- aslakknutsen
+- bartoszmajsak
+- cam-garrison
 
 reviewers:
-- anishasthana
-- lavlas
-- VaishnaviHire
+- aslakknutsen
+- bartoszmajsak
+- cam-garrison
