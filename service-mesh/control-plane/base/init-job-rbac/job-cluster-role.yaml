@@ -21,6 +21,12 @@ rules:
       - update
       - watch
   - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - list
+  - apiGroups:
       - apiextensions.k8s.io
     resources:
       - customresourcedefinitions

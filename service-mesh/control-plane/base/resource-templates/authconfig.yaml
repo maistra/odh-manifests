@@ -19,7 +19,7 @@ spec:
         valueFrom: { authJSON: auth.identity.username }
       resourceAttributes:
         namespace:
-          value: opendatahub # TODO:HARDCODED
+          value: $ODH_NAMESPACE
         group:
           value: ""
         resource:

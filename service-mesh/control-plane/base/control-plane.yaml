@@ -16,19 +16,7 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 129Mi
-  tracing:
-    type: Jaeger
-    sampling: 10000
-  addons:
-    jaeger:
-      name: jaeger
-      install:
-        storage:
-          type: Memory
-    kiali:
-      enabled: true
-      name: kiali
+            memory: 128Mi
   gateways:
     # no need to use IOR -
     # To be deprecated and we create the route manually

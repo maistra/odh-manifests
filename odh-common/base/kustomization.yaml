@@ -11,6 +11,7 @@ commonLabels:
 configMapGenerator:
 - name: odh-common-config
   env: params.env
+
 generatorOptions:
   disableNameSuffixHash: true
 
