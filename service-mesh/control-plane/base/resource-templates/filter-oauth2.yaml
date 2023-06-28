@@ -37,7 +37,7 @@ spec:
                 address:
                   socket_address:
                     address: $OAUTH_ROUTE
-                    port_value: 443
+                    port_value: $OAUTH_PORT
   - applyTo: HTTP_FILTER
     match:
       context: GATEWAY
