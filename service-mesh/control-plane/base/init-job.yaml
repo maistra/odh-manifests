@@ -52,7 +52,8 @@ spec:
               cat "$filename" | envsubst | kubectl apply -n $namespace -f -
             }
 
-            # create secrets for oauth2 (formerly configmap)
+            # recreate secrets for oauth2
+            kubectl delete secret istio-odh-oauth2 -n ${ISTIO_NAMESPACE} --ignore-not-found
             kubectl create secret generic istio-odh-oauth2 -n ${ISTIO_NAMESPACE} \
                 --from-file=token-secret.yaml=<(envsubst < $TOKEN_FILEPATH) \
                 --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
