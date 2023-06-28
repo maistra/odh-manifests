@@ -1,12 +1,26 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: init-job-clusterrolebinding
+  name: init-job-creator
   namespace: istio-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: init-job-role
+  name: init-job-create
+subjects:
+  - kind: ServiceAccount
+    name: init-job-executor
+    namespace: istio-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: init-job-reader
+  namespace: istio-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: init-job-read
 subjects:
   - kind: ServiceAccount
     name: init-job-executor
