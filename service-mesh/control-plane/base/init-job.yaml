@@ -29,7 +29,9 @@ spec:
             endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
             export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
             export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
-            export OAUTH_ROUTE=$(echo $endpoint | jq .issuer | sed 's/"//g; s/https:\/\///g') # remove quotes and https
+            issuer=$(echo $endpoint | jq -r '.issuer')
+            export OAUTH_PORT=$(echo $issuer | sed -n 's/.*:\([0-9]\+\)$/\1/p')
+            export OAUTH_ROUTE=$(echo $issuer | sed 's/^https\?:\/\/\([^:\/]*\).*$/\1/')
             export TOKEN_FILEPATH="/etc/cluster-resources/token-secret.yaml"
             export HMAC_FILEPATH="/etc/cluster-resources/hmac-secret.yaml"
 
