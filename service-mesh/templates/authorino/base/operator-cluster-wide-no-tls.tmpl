@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Auth.Namespace }}
 spec:
   image: {{ .Auth.Authorino.Image }}
-  authConfigLabelSelectors: {{ .Auth.Authorino.Topic }}
+  authConfigLabelSelectors: {{ .Auth.Authorino.Label }}
   clusterWide: true
   listener:
     tls:

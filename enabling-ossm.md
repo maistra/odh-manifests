@@ -153,7 +153,7 @@ spec:
           name: authorino
           namespace: auth-provider
           authorino:
-            topic: authorino/topic=odh
+            label: authorino/topic=odh
   applications:
     - kustomizeConfig:
         repoRef:

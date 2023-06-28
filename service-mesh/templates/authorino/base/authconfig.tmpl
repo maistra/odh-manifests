@@ -4,7 +4,7 @@ metadata:
   name: odh-dashboard-protection
   namespace: {{ .AppNamespace }}
   labels:
-    {{ ReplaceChar .Auth.Authorino.Topic "=" ": " }}
+    {{ ReplaceChar .Auth.Authorino.Label "=" ": " }}
 spec:
   hosts:
   - {{.AppNamespace}}.{{ .Domain }}
