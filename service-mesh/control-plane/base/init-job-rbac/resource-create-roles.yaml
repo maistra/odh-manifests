@@ -38,6 +38,7 @@ rules:
       - create
       - update
       - patch
+      - delete
   - apiGroups:
       - oauth.openshift.io 
     resources:

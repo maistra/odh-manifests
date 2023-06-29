@@ -20,7 +20,7 @@ spec:
             curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
             export PATH=/tmp/bin:$PATH
 
-            export ISTIO_NAMESPACE=$(kubectl get jobs -o jsonpath='{.items[?(@.metadata.name=="odh-ossm-init-job")].metadata.namespace}')
+            export ISTIO_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
             export ODH_NAMESPACE=$(kubectl get configmap --all-namespaces -o json | jq -r '.items[] | select(.metadata.name == "odh-common-config") | .metadata.namespace')
 
             export CLIENT_SECRET=$(openssl rand -hex 32)
@@ -54,6 +54,14 @@ spec:
 
               cat "$filename" | envsubst | kubectl apply -n $namespace -f -
             }
+
+            route_name="odh-dashboard"
+            while ! kubectl get route "${route_name}" -n "${ODH_NAMESPACE}" >/dev/null 2>&1; do
+                echo "Waiting for the ${route_name} Route resource to be created..."
+                sleep 5
+            done
+
+            kubectl delete route "${route_name}" -n "${ODH_NAMESPACE}"
 
             # recreate secrets for oauth2
             kubectl delete secret istio-odh-oauth2 -n ${ISTIO_NAMESPACE} --ignore-not-found
