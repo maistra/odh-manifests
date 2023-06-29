@@ -31,6 +31,7 @@ spec:
             export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
             issuer=$(echo $endpoint | jq -r '.issuer')
             export OAUTH_PORT=$(echo $issuer | sed -n 's/.*:\([0-9]\+\)$/\1/p')
+            OAUTH_PORT=${OAUTH_PORT:-443}
             export OAUTH_ROUTE=$(echo $issuer | sed 's/^https\?:\/\/\([^:\/]*\).*$/\1/')
             export TOKEN_FILEPATH="/etc/cluster-resources/token-secret.yaml"
             export HMAC_FILEPATH="/etc/cluster-resources/hmac-secret.yaml"
