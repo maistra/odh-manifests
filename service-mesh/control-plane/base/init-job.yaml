@@ -74,10 +74,10 @@ spec:
                 
             # migrate pre-existing data science project namespaces to enable ossm
             # Get the namespaces with the label opendatahub.io/dashboard=true
-            ds_projects=$(oc get namespaces -l opendatahub.io/dashboard=true --no-headers -o custom-columns=NAME:.metadata.name)
+            ds_projects=$(kubectl get namespaces -l opendatahub.io/dashboard=true --no-headers -o custom-columns=NAME:.metadata.name)
             
             # Use xargs to run oc annotate for each DS project namespace found
-            echo $ds_projects | xargs -I {} oc annotate namespace {} opendatahub.io/service-mesh=true --overwrite
+            echo $ds_projects | xargs -I {} kubectl annotate namespace {} opendatahub.io/service-mesh=true --overwrite
             
             # wait for app to be ready
             echo "waiting for SMCP to be ready"
