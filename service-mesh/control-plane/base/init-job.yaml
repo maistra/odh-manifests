@@ -65,7 +65,7 @@ spec:
 
             route_name="odh-dashboard"
             while ! kubectl get route "${route_name}" -n "${ODH_NAMESPACE}" >/dev/null 2>&1; do
-                echo "Waiting for the ${route_name} Route resource to be created..."
+                echo "Waiting for the ${route_name} Route resource to be created in ${ODH_NAMESPACE}..."
                 sleep 5
             done
 
