@@ -2,7 +2,7 @@ kind: OAuthClient
 apiVersion: oauth.openshift.io/v1
 metadata:
  name: odh
-secret: "$CLIENT_SECRET" # gitleaks:allow
+secret: "$CLIENT_SECRET"
 redirectURIs:
 - "https://opendatahub.$DOMAIN"
 grantMethod: prompt

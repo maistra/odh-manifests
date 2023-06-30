@@ -47,3 +47,16 @@ rules:
       - create
       - update
       - patch
+  - apiGroups:
+      - maistra.io
+    resources:  
+      - servicemeshcontrolplanes
+    verbs:
+      - patch
+      - use
+  - apiGroups:
+      - maistra.io
+    resources: 
+      - servicemeshmembers
+    verbs:
+      - create

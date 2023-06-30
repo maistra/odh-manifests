@@ -2,7 +2,6 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: opendatahub-odh-gateway
-  namespace: istio-system
   labels:
     app: odh-dashboard
     app.kubernetes.io/part-of: odh-dashboard

@@ -13,8 +13,11 @@ spec:
           - |
             mkdir /tmp/bin
 
+            # install yq for yaml parsing.
+            curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /tmp/bin/yq  && chmod +x /tmp/bin/yq 
+
             # install jq for json parsing. 
-            curl -L https://github.com/jqlang/jq/releases/download/jq-1.6/jq-linux64  -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
+            curl -L https://github.com/jqlang/jq/releases/download/jq-1.6/jq-linux64 -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
 
             # install envsubst 
             curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
@@ -32,8 +35,8 @@ spec:
             issuer=$(echo $endpoint | jq -r '.issuer')
             export OAUTH_PORT=$(echo $issuer | sed -n 's/.*:\([0-9]\+\)$/\1/p')
             OAUTH_PORT=${OAUTH_PORT:-443}
-            export OAUTH_ROUTE=$(echo $issuer | sed 's/^https\?:\/\/\([^:\/]*\).*$/\1/')
             export TOKEN_FILEPATH="/etc/cluster-resources/token-secret.yaml"
+            export OAUTH_ROUTE=$(echo $issuer | sed 's/^https\?:\/\/\([^:\/]*\).*$/\1/')
             export HMAC_FILEPATH="/etc/cluster-resources/hmac-secret.yaml"
 
             apply_yaml() {
@@ -44,15 +47,20 @@ spec:
               [[ " ${skip_files[*]} " =~ " ${filename} " ]] && return 0
 
               case "$filename" in
-                "/etc/cluster-resources/authconfig.yaml")
+                "/etc/cluster-resources/authconfig.yaml" | "/etc/cluster-resources/00_smm.yaml")
                   namespace="${ODH_NAMESPACE}"
                   ;;
                 *)
                   namespace="${ISTIO_NAMESPACE}"
                   ;;
               esac
-
-              cat "$filename" | envsubst | kubectl apply -n $namespace -f -
+              
+              if [[ "${filename}" =~ \.patch\.yaml$ ]]; then
+                kind_name=$(cat "${filename}" | envsubst | yq eval '.kind, .metadata.name' | awk '{ printf("%s/", tolower($0)) }' | sed 's/\/$//')
+                kubectl patch $kind_name -n $namespace --type=merge -p "$(cat "${filename}" | envsubst)"
+              else
+                cat "${filename}" | envsubst | kubectl apply -n $namespace -f -
+              fi
             }
 
             route_name="odh-dashboard"
@@ -72,9 +80,10 @@ spec:
             # add annotation to the root namespace (hardcoded pre-plugin)
             kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true
 
-            # wait for app to be ready
-            echo "waiting for SMCP to be ready"
-            kubectl -n ${ISTIO_NAMESPACE} wait --for=condition=Ready smcp/basic --timeout=180s          
+            export SMCP_NAME=$(kubectl get smcp -n ${ISTIO_NAMESPACE} -o name | head -n 1 | awk -F '/' '{ print $NF }')
+            
+            echo "waiting for smcp/${SMCP_NAME} to be ready"
+            kubectl -n ${ISTIO_NAMESPACE} wait --for=condition=Ready smcp/${SMCP_NAME} --timeout=180s          
 
             # iterate over all files in the subdirectory
             for filename in /etc/cluster-resources/*
