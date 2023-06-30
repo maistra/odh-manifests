@@ -14,4 +14,14 @@ spec:
   - to:
     - operation:
         # hosts: ["odh-dashboard.opendatahub.svc.cluster.local"] # todo: add more?
-        notPaths: ["/auth/*", "/metrics/*"] # todo: see if this is necessary
+        notPaths: # todo: see if this is necessary
+        - "/auth/*"
+        - "/metrics/*"
+        # FIXME: This always bypasses authZ for ModelMesh. It should not if
+        # the model is flagged to be auth-protected.
+        - "/modelmesh/*"
+        - "/vmodel-route/*"
+    when:
+    - key: request.headers[Content-Type]
+      notValues:
+      - "application/grpc*"

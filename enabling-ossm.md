@@ -118,6 +118,22 @@ spec:
         name: manifests
         path: service-mesh/authorino
    name: authorino
+ - kustomizeConfig:
+      parameters:
+        - name: monitoring-namespace
+          value: opendatahub
+      repoRef:
+        name: manifests
+        path: model-mesh
+   name: model-mesh
+ - kustomizeConfig:
+      parameters:
+        - name: deployment-namespace
+          value: opendatahub
+      repoRef:
+        name: manifests
+        path: modelmesh-monitoring
+   name: modelmesh-monitoring
  repos:
  - name: manifests
    uri: https://github.com/maistra/odh-manifests/tarball/service-mesh-integration
