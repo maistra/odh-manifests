@@ -79,9 +79,16 @@ spec:
                 --from-file=token-secret.yaml=<(envsubst < $TOKEN_FILEPATH) \
                 --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
 
-            # add annotation to the root namespace (hardcoded pre-plugin)
-            kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true          
-      
+          
+            kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true
+                
+            # migrate pre-existing data science project namespaces to enable ossm
+            # Get the namespaces with the label opendatahub.io/dashboard=true
+            ds_projects=$(kubectl get namespaces -l opendatahub.io/dashboard=true --no-headers -o custom-columns=NAME:.metadata.name)
+            
+            # Use xargs to run oc annotate for each DS project namespace found
+            echo $ds_projects | xargs -I {} kubectl annotate namespace {} opendatahub.io/service-mesh=true --overwrite
+
             # iterate over all files in the subdirectory
             for filename in /etc/cluster-resources/*
             do
