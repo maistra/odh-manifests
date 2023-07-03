@@ -24,6 +24,8 @@ spec:
             export PATH=/tmp/bin:$PATH
 
             export ISTIO_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            export SMCP_NAME=$(kubectl get smcp -n ${ISTIO_NAMESPACE} -o name | head -n 1 | awk -F '/' '{ print $NF }')
+
             export ODH_NAMESPACE=$(kubectl get configmap --all-namespaces -o json | jq -r '.items[] | select(.metadata.name == "odh-common-config") | .metadata.namespace')
 
             export CLIENT_SECRET=$(openssl rand -hex 32)
@@ -47,7 +49,7 @@ spec:
               [[ " ${skip_files[*]} " =~ " ${filename} " ]] && return 0
 
               case "$filename" in
-                "/etc/cluster-resources/06_authconfig.yaml" | "/etc/cluster-resources/00_smm.yaml")
+                "/etc/cluster-resources/06_authconfig.yaml")
                   namespace="${ODH_NAMESPACE}"
                   ;;
                 *)
@@ -78,33 +80,19 @@ spec:
                 --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
 
             # add annotation to the root namespace (hardcoded pre-plugin)
-            kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true
-
-            export SMCP_NAME=$(kubectl get smcp -n ${ISTIO_NAMESPACE} -o name | head -n 1 | awk -F '/' '{ print $NF }')
-            
-            echo "waiting for smcp/${SMCP_NAME} to be ready"
-            kubectl -n ${ISTIO_NAMESPACE} wait --for=condition=Ready smcp/${SMCP_NAME} --timeout=180s          
-
+            kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true          
+      
             # iterate over all files in the subdirectory
             for filename in /etc/cluster-resources/*
             do
               apply_yaml "$filename"
             done
 
-            # Ensure secrets are mounted in ingress-gateway. If not, restart the pod.
-            kubectl wait pods -l app=istio-ingressgateway --for condition=ready -n ${ISTIO_NAMESPACE}
-
-            INGRESS_POD=$(kubectl get pods -n ${ISTIO_NAMESPACE} -l app=istio-ingressgateway -o jsonpath='{.items[0].metadata.name}')
-            EXEC_OUTPUT=$(kubectl exec $INGRESS_POD -n ${ISTIO_NAMESPACE} -c istio-proxy -- ls -al /etc/istio/odh-oauth2/{token-secret.yaml,hmac-secret.yaml} 2>&1)
-            EXEC_EXIT_STATUS=$?
-
-            if echo $EXEC_OUTPUT | grep -q 'No such file or directory'; then
-              # If we don't see the secrets mounted, restart deployment.
-              kubectl rollout restart deployment -n ${ISTIO_NAMESPACE} istio-ingressgateway
-            elif [[ $EXEC_EXIT_STATUS -ne 0 ]]; then
-              echo "Failed with: $EXEC_OUTPUT"
-              exit 1
-            fi
+            # wait for authorino deployment to become available
+            # restart it to ensure it will have istio-proxy sidecar injected
+            kubectl wait --for=condition=available --timeout=300s deployment --all-namespaces -l component.opendatahub.io/name=auth
+            authorinoNs=$(kubectl get deployments --all-namespaces -l component.opendatahub.io/name=auth -o yaml | yq -r '.items[] | select(.metadata.name == "authorino") | .metadata.namespace')
+            kubectl rollout restart deployment -n ${authorinoNs} authorino
 
             exit 0
             

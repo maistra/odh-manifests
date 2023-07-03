@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-mesh-refs
+data:
+  CONTROL_PLANE_NAME: $(smcpName)
+  MESH_NAMESPACE: $(istioNamespace)
+

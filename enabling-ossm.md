@@ -125,6 +125,14 @@ spec:
         path: service-mesh/control-plane
    name: control-plane
  - kustomizeConfig:
+      parameters:
+        - name: namespace
+          value: auth-provider
+      repoRef:
+        name: manifests
+        path: service-mesh/authorino
+   name: authorino  
+ - kustomizeConfig:
       overlays:
         - service-mesh
       repoRef:
@@ -156,14 +164,6 @@ spec:
         name: manifests
         path: notebook-images
    name: notebook-images
- - kustomizeConfig:
-      parameters:
-        - name: namespace
-          value: auth-provider
-      repoRef:
-        name: manifests
-        path: service-mesh/authorino
-   name: authorino
  repos:
  - name: manifests
    uri: https://github.com/maistra/odh-manifests/tarball/service-mesh-integration

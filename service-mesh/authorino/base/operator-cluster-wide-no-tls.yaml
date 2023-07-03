@@ -3,6 +3,8 @@ kind: Authorino
 metadata:
   name: authorino
   namespace: auth-provider
+  labels:
+    sidecar.istio.io/inject: "true"
 spec:
   image: quay.io/kuadrant/authorino:v0.13.0
   authConfigLabelSelectors: authorino/topic=odh

@@ -14,6 +14,13 @@ rules:
       - update
       - patch
   - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - update
+      - patch
+  - apiGroups:
       - networking.istio.io
     resources:
       - envoyfilters
@@ -54,9 +61,3 @@ rules:
     verbs:
       - patch
       - use
-  - apiGroups:
-      - maistra.io
-    resources: 
-      - servicemeshmembers
-    verbs:
-      - create

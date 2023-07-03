@@ -7,7 +7,6 @@ resources:
 - init-job.yaml
 - init-job-rbac/resource-read-roles.yaml
 - init-job-rbac/resource-create-roles.yaml
-- init-job-rbac/pod-executor-roles.yaml
 - init-job-rbac/job-rolebinding.yaml
 - init-job-rbac/job-sa.yaml
 - cert-secret.yaml

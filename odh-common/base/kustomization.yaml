@@ -11,7 +11,11 @@ commonLabels:
 configMapGenerator:
 - name: odh-common-config
   env: params.env
-
+- name: service-mesh-refs
+  literals:
+    - MESH_NAMESPACE=$(istioNamespace)
+    - CONTROL_PLANE_NAME=$(smcpName)
+  
 generatorOptions:
   disableNameSuffixHash: true
 

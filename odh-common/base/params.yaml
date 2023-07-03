@@ -8,3 +8,9 @@ varReference:
 - path: spec/controlPlaneRef/namespace
   kind: ServiceMeshMember
   apiGroup: maistra.io/v1
+- path: data/CONTROL_PLANE_NAME
+  kind: ConfigMap
+  apiGroup: v1
+- path: data/MESH_NAMESPACE
+  kind: ConfigMap
+  apiGroup: v1
