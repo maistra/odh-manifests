@@ -22,7 +22,21 @@ vars:
     name: odh-common-config
     apiVersion: v1
   fieldref:
-    fieldpath: metadata.namespace
+    fieldpath: data.namespace
+- name: istioNamespace
+  objref:
+    kind: ConfigMap
+    name: odh-common-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.istioNamespace
+- name: smcpName
+  objref:
+    kind: ConfigMap
+    name: odh-common-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.smcpName
 
 configurations:
 - params.yaml

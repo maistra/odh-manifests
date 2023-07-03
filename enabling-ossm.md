@@ -125,6 +125,8 @@ spec:
         path: service-mesh/control-plane
    name: control-plane
  - kustomizeConfig:
+      overlays:
+        - service-mesh
       repoRef:
         name: manifests
         path: odh-common

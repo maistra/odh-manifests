@@ -4,5 +4,5 @@ metadata:
   name: default
 spec:
   controlPlaneRef:
-    namespace: ${ISTIO_NAMESPACE}
-    name: ${SMCP_NAME}
+    namespace: $(istioNamespace)
+    name: $(smcpName)
