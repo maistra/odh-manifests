@@ -75,7 +75,7 @@ createSubscription "authorino-operator" "community-operators" "alpha"
 > Make sure to configure the Service Mesh Control Plane, as we are patching it.
 
 
-For example, the following commands configure a minimal profile:
+For example, the following commands configure a slimmed-down profile:
 
 ```sh
 kubectl create ns istio-system
@@ -83,7 +83,7 @@ kubectl apply -n istio-system -f -<<EOF
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: minimal
+  name: basic
 spec:
   version: v2.3
   tracing:
