@@ -11,6 +11,20 @@ spec:
         command: ["/bin/bash", "-c", "--"]
         args:
           - |
+            restart_deployment_if_istio_proxy_not_injected() {
+                local namespace=$1
+                local label_selector=$2
+
+                istio_proxy_injected=$(kubectl get pod -l "$label_selector" -n "$namespace" -o yaml | yq eval '.items[].spec.containers[].name' - | grep -q '^istio-proxy$' && echo true || echo false)
+
+                if [ "${istio_proxy_injected}" = "true" ]; then
+                    echo "istio-proxy sidecar found in pod matching \"$label_selector\" in \"$namespace\"."
+                else
+                    echo "istio-proxy sidecar NOT found in pod matching \"$label_selector\" in \"$namespace\". Restarting."
+                    kubectl rollout restart deployment -n "$namespace" --selector="$label_selector"
+                fi
+            }
+
             mkdir /tmp/bin
 
             # install yq for yaml parsing.
@@ -95,11 +109,18 @@ spec:
               apply_yaml "$filename"
             done
 
-            # wait for authorino deployment to become available
+            echo "Waiting for authorino deployment to become available..."
             # restart it to ensure it will have istio-proxy sidecar injected
-            kubectl wait --for=condition=available --timeout=300s deployment --all-namespaces -l component.opendatahub.io/name=auth
-            authorinoNs=$(kubectl get deployments --all-namespaces -l component.opendatahub.io/name=auth -o yaml | yq -r '.items[] | select(.metadata.name == "authorino") | .metadata.namespace')
-            kubectl rollout restart deployment -n ${authorinoNs} authorino
+            auth_label="component.opendatahub.io/name=odh-auth"
+            kubectl wait --for=condition=available --timeout=300s deployment --all-namespaces -l $auth_label
+            authorino_namespace=$(kubectl get deployments --all-namespaces -l $auth_label -o yaml | yq -r '.items[] | select(.metadata.name == "authorino") | .metadata.namespace')
+
+            restart_deployment_if_istio_proxy_not_injected "${authorino_namespace}" "${auth_label}"
+
+            echo "Waiting for dashboard deployment to become available..."
+            dashboard_label="app=odh-dashboard"
+            kubectl wait --for=condition=available --timeout=300s deployment -n ${ODH_NAMESPACE} -l $dashboard_label
+            restart_deployment_if_istio_proxy_not_injected "${ODH_NAMESPACE}" "${dashboard_label}"
 
             exit 0
             

@@ -8,7 +8,7 @@ resources:
 
 commonLabels:
   opendatahub.io/component: "true"
-  component.opendatahub.io/name: auth
+  component.opendatahub.io/name: odh-auth
 
 configMapGenerator:
 - name: authorino-config
