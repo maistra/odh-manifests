@@ -248,7 +248,7 @@ kubectl get oauthclient.oauth.openshift.io odh
 kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- cat /etc/istio/odh-oauth2/token-secret.yaml
 kubectl get secret istio-odh-oauth2 -n istio-system -o yaml
 ```
-To read the actual value of secrets you could use a [`kubectl` plugin](https://github.com/elsesiy/kubectl-view-secret) instead. Then the last line would look as follows `kubectl view-secret istio-odh-oauth2 -n istio-system`.
+To read the actual value of secrets you could use a [`kubectl` plugin](https://github.com/elsesiy/kubectl-view-secret) instead. Then the last line would look as follows `kubectl view-secret istio-odh-oauth2 -n istio-system -a`.
 
 The `i`stio-ingressgateway` pod might be out of sync (and so `EnvoyFilter` responsible for OAuth2 flow). Check its logs and consider restarting it:
 
