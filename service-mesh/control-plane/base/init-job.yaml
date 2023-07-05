@@ -63,7 +63,7 @@ spec:
               [[ " ${skip_files[*]} " =~ " ${filename} " ]] && return 0
 
               case "$filename" in
-                "/etc/cluster-resources/06_authconfig.yaml")
+                "/etc/cluster-resources/06_authconfig.yaml"|"/etc/cluster-resources/07_gateway.yaml"|"/etc/cluster-resources/08_virtual-service.yaml")
                   namespace="${ODH_NAMESPACE}"
                   ;;
                 *)
