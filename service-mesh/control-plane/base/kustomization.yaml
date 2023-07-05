@@ -21,6 +21,8 @@ configMapGenerator:
       - resource-templates/04_filter-oauth2.yaml
       - resource-templates/05_gateway-route.yaml
       - resource-templates/06_authconfig.yaml
+      - resource-templates/07_gateway.yaml
+      - resource-templates/08_virtual-service.yaml      
       - resource-templates/hmac-secret.yaml
       - resource-templates/token-secret.yaml
       - auth-policy.yaml
