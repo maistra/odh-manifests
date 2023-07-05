@@ -17,11 +17,10 @@ rules:
       - update
       - patch
   - apiGroups:
-      - networking.istio.io/v1alpha3
+      - networking.istio.io
     resources:
       - gateways
       - virtualservices
     verbs:
       - create
       - get
-      
