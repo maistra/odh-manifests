@@ -14,10 +14,10 @@ spec:
       mode: SIMPLE
       credentialName: odh-dashboard-cert
     hosts:
-    - "*"
+    - "opendatahub.apps-crc.testing"
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - "*"
+    - "opendatahub.apps-crc.testing"

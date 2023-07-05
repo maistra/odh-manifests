@@ -6,7 +6,7 @@ spec:
   gateways:
   - odh-gateway
   hosts:
-  - "*"
+  - "opendatahub.apps-crc.testing"
   http:
   - route:
     - destination:
