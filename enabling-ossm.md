@@ -58,7 +58,7 @@ You can use the function above to install all required operators:
 createSubscription "servicemeshoperator"
 # Temporarily, we use our custom operator build until operator changes are merged.
 # createSubscription "opendatahub-operator" "community-operators"
-operator-sdk run bundle quay.io/maistra-dev/opendatahub-operator-bundle:v0.0.4--namespace openshift-operators --timeout 5m0s
+operator-sdk run bundle quay.io/maistra-dev/opendatahub-operator-bundle:v0.0.4 --namespace openshift-operators --timeout 5m0s
 createSubscription "authorino-operator" "community-operators" "alpha"
 ```
 
@@ -153,7 +153,7 @@ spec:
           name: authorino
           namespace: auth-provider
           authorino:
-            label: authorino/topic=odh
+            topic: authorino/topic=odh
   applications:
     - kustomizeConfig:
         repoRef:
