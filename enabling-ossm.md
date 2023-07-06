@@ -153,7 +153,7 @@ spec:
           name: authorino
           namespace: auth-provider
           authorino:
-            topic: authorino/topic=odh
+            label: authorino/topic=odh
   applications:
     - kustomizeConfig:
         repoRef:
@@ -187,8 +187,8 @@ spec:
       name: notebook-images
   repos:
     - name: manifests
-      uri: https://github.com/maistra/odh-manifests/tarball/ossm_plugin_templates
-  version: ossm_plugin_templates
+      uri: https://github.com/maistra/odh-manifests/tarball/v0.0.4
+  version: v0.0.4
 EOF
 ```
 
