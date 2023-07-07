@@ -13,7 +13,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      credentialName: odh-dashboard-cert
+      credentialName: {{ .Mesh.Certificate.Name }}
     hosts:
     - "opendatahub.{{ .Domain }}"
   - port:
