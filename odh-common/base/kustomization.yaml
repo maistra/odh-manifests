@@ -8,6 +8,9 @@ commonLabels:
   component.opendatahub.io/name: odh-common
   app.kubernetes.io/part-of: odh-common
 
+configMapGenerator:
+- name: odh-common-config
+  env: params.env
 generatorOptions:
   disableNameSuffixHash: true
 
