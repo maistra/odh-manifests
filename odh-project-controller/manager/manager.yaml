@@ -46,8 +46,14 @@ spec:
             - name: AUTHORINO_LABEL
               valueFrom:
                 configMapKeyRef:
-                  name: service-mesh-refs
+                  name: auth-refs
                   key: AUTHORINO_LABEL
+                  optional: true
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-refs
+                  key: AUTH_AUDIENCE
                   optional: true
           livenessProbe:
             httpGet:
