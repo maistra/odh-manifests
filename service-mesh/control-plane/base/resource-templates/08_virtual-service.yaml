@@ -8,6 +8,16 @@ spec:
   hosts:
   - "opendatahub.$DOMAIN"
   http:
+  - match:
+    - uri:
+        regex: "^/notebook/.*/.*/logout"
+    route:
+    - destination:
+        host: odh-dashboard
+        port:
+          number: 80
+    rewrite:
+      uri: "/oauth/sign_out"
   - route:
     - destination:
         host: odh-dashboard
