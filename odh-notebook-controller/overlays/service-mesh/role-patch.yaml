@@ -1,0 +1,35 @@
+
+## OSSM specific resources
+- op: add
+  path: /rules/-
+  value:
+    apiGroups:
+      - maistra.io
+    resources:
+      - servicemeshmembers
+      - servicemeshcontrolplanes
+      - servicemeshmemberroles
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - use
+
+## Authorino specific resources
+- op: add
+  path: /rules/-
+  value:
+    apiGroups:
+      - authorino.kuadrant.io
+    resources:
+      - authconfigs
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch

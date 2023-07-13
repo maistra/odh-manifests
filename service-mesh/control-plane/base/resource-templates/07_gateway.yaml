@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: odh-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: odh-dashboard-cert
+    hosts:
+    - "opendatahub.$DOMAIN"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "opendatahub.$DOMAIN"

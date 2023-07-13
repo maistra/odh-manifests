@@ -1,0 +1,20 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: opendatahub-odh-gateway
+  labels:
+    app: odh-dashboard
+    app.kubernetes.io/part-of: odh-dashboard
+    maistra.io/gateway-name: odh-gateway
+    maistra.io/gateway-namespace: opendatahub
+spec:
+  host: opendatahub.$DOMAIN
+  to:
+    kind: Service
+    name: istio-ingressgateway
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+  wildcardPolicy: None

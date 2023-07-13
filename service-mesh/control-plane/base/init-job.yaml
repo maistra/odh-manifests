@@ -1,0 +1,135 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: odh-ossm-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: odh-ossm-init-job
+        image: quay.io/openshift/origin-cli
+        command: ["/bin/bash", "-c", "--"]
+        args:
+          - |
+            restart_deployment_if_istio_proxy_not_injected() {
+                local namespace=$1
+                local label_selector=$2
+
+                istio_proxy_injected=$(kubectl get pod -l "$label_selector" -n "$namespace" -o yaml | yq eval '.items[].spec.containers[].name' - | grep -q '^istio-proxy$' && echo true || echo false)
+
+                if [ "${istio_proxy_injected}" = "true" ]; then
+                    echo "istio-proxy sidecar found in pod matching \"$label_selector\" in \"$namespace\"."
+                else
+                    echo "istio-proxy sidecar NOT found in pod matching \"$label_selector\" in \"$namespace\". Restarting."
+                    kubectl rollout restart deployment -n "$namespace" --selector="$label_selector"
+                fi
+            }
+
+            mkdir /tmp/bin
+
+            # install yq for yaml parsing.
+            curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /tmp/bin/yq  && chmod +x /tmp/bin/yq 
+
+            # install jq for json parsing. 
+            curl -L https://github.com/jqlang/jq/releases/download/jq-1.6/jq-linux64 -o /tmp/bin/jq  && chmod +x /tmp/bin/jq 
+
+            # install envsubst 
+            curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o /tmp/bin/envsubst && chmod +x /tmp/bin/envsubst
+            export PATH=/tmp/bin:$PATH
+
+            export ISTIO_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            export SMCP_NAME=$(kubectl get smcp -n ${ISTIO_NAMESPACE} -o name | head -n 1 | awk -F '/' '{ print $NF }')
+
+            export ODH_NAMESPACE=$(kubectl get configmap --all-namespaces -o json | jq -r '.items[] | select(.metadata.name == "odh-common-config") | .metadata.namespace')
+
+            export CLIENT_SECRET=$(openssl rand -hex 32)
+            export HMAC_SECRET=$(openssl rand -hex 32)
+            export DOMAIN=$(kubectl get ingress.config.openshift.io cluster -o 'jsonpath={.spec.domain}')
+            endpoint=$(curl https://kubernetes.default.svc/.well-known/oauth-authorization-server -sS -k)
+            export TOKEN_ENDPOINT=$(echo $endpoint | jq .token_endpoint)
+            export AUTH_ENDPOINT=$(echo $endpoint | jq .authorization_endpoint)
+            issuer=$(echo $endpoint | jq -r '.issuer')
+            export OAUTH_PORT=$(echo $issuer | sed -n 's/.*:\([0-9]\+\)$/\1/p')
+            OAUTH_PORT=${OAUTH_PORT:-443}
+            export TOKEN_FILEPATH="/etc/cluster-resources/token-secret.yaml"
+            export OAUTH_ROUTE=$(echo $issuer | sed 's/^https\?:\/\/\([^:\/]*\).*$/\1/')
+            export HMAC_FILEPATH="/etc/cluster-resources/hmac-secret.yaml"
+
+            apply_yaml() {
+              filename="$1"
+
+              # Skip these secret files, they are used elsewhere.
+              skip_files=("$TOKEN_FILEPATH" "$HMAC_FILEPATH")
+              [[ " ${skip_files[*]} " =~ " ${filename} " ]] && return 0
+
+              case "$filename" in
+                "/etc/cluster-resources/06_authconfig.yaml"|"/etc/cluster-resources/07_gateway.yaml"|"/etc/cluster-resources/08_virtual-service.yaml")
+                  namespace="${ODH_NAMESPACE}"
+                  ;;
+                *)
+                  namespace="${ISTIO_NAMESPACE}"
+                  ;;
+              esac
+              
+              if [[ "${filename}" =~ \.patch\.yaml$ ]]; then
+                kind_name=$(cat "${filename}" | envsubst | yq eval '.kind, .metadata.name' | awk '{ printf("%s/", tolower($0)) }' | sed 's/\/$//')
+                kubectl patch $kind_name -n $namespace --type=merge -p "$(cat "${filename}" | envsubst)"
+              else
+                cat "${filename}" | envsubst | kubectl apply -n $namespace -f -
+              fi
+            }
+
+            route_name="odh-dashboard"
+            while ! kubectl get route "${route_name}" -n "${ODH_NAMESPACE}" >/dev/null 2>&1; do
+                echo "Waiting for the ${route_name} Route resource to be created in ${ODH_NAMESPACE}..."
+                sleep 5
+            done
+
+            kubectl delete route "${route_name}" -n "${ODH_NAMESPACE}"
+
+            # recreate secrets for oauth2
+            kubectl delete secret istio-odh-oauth2 -n ${ISTIO_NAMESPACE} --ignore-not-found
+            kubectl create secret generic istio-odh-oauth2 -n ${ISTIO_NAMESPACE} \
+                --from-file=token-secret.yaml=<(envsubst < $TOKEN_FILEPATH) \
+                --from-file=hmac-secret.yaml=<(envsubst < $HMAC_FILEPATH)
+
+          
+            kubectl annotate namespace ${ODH_NAMESPACE} opendatahub.io/service-mesh=true
+                
+            # migrate pre-existing data science project namespaces to enable ossm
+            # Get the namespaces with the label opendatahub.io/dashboard=true
+            ds_projects=$(kubectl get namespaces -l opendatahub.io/dashboard=true --no-headers -o custom-columns=NAME:.metadata.name)
+            
+            # Use xargs to run oc annotate for each DS project namespace found
+            echo $ds_projects | xargs -I {} kubectl annotate namespace {} opendatahub.io/service-mesh=true --overwrite
+
+            # iterate over all files in the subdirectory
+            for filename in /etc/cluster-resources/*
+            do
+              apply_yaml "$filename"
+            done
+
+            echo "Waiting for authorino deployment to become available..."
+            # restart it to ensure it will have istio-proxy sidecar injected
+            auth_label="component.opendatahub.io/name=odh-auth"
+            kubectl wait --for=condition=available --timeout=300s deployment --all-namespaces -l $auth_label
+            authorino_namespace=$(kubectl get deployments --all-namespaces -l $auth_label -o yaml | yq -r '.items[] | select(.metadata.name == "authorino") | .metadata.namespace')
+
+            restart_deployment_if_istio_proxy_not_injected "${authorino_namespace}" "${auth_label}"
+
+            echo "Waiting for dashboard deployment to become available..."
+            dashboard_label="app=odh-dashboard"
+            kubectl wait --for=condition=available --timeout=300s deployment -n ${ODH_NAMESPACE} -l $dashboard_label
+            restart_deployment_if_istio_proxy_not_injected "${ODH_NAMESPACE}" "${dashboard_label}"
+
+            exit 0
+            
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cluster-resources
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cluster-resources
+      restartPolicy: Never
+      serviceAccountName: init-job-executor

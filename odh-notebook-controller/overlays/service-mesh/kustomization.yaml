@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- ../../base
+
+configMapGenerator:
+- name: config
+  behavior: merge
+  literals:
+  - USE_ISTIO=true
+  - ISTIO_GATEWAY=opendatahub/odh-gateway # TODO set by the ossm plugin
+
+# needs to be `patchesJson6902`, `patches` seems to be ignored
+# also: inline patches do not work, operator complains about overlays/service-mesh being
+# a directory and not a kustomization.yaml file
+patchesJson6902:
+- path: role-patch.yaml
+  target:
+    group: rbac.authorization.k8s.io
+    version: v1
+    kind: ClusterRole
+    name: manager-role
+    

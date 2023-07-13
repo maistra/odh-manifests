@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+
+resources:
+- namespace.yaml
+- init-job.yaml
+- init-job-rbac/resource-read-roles.yaml
+- init-job-rbac/resource-create-roles.yaml
+- init-job-rbac/job-rolebinding.yaml
+- init-job-rbac/job-sa.yaml
+- cert-secret.yaml
+
+# These resources are processed by the init-job in the cluster
+configMapGenerator:
+  - name: cluster-resources
+    files:
+      - resource-templates/01_oauth-client.yaml
+      - resource-templates/02_control-plane-ext-authz.patch.yaml
+      - resource-templates/03_control-plane-oauth2-secrets.patch.yaml
+      - resource-templates/04_filter-oauth2.yaml
+      - resource-templates/05_gateway-route.yaml
+      - resource-templates/06_authconfig.yaml
+      - resource-templates/07_gateway.yaml
+      - resource-templates/08_virtual-service.yaml      
+      - resource-templates/hmac-secret.yaml
+      - resource-templates/token-secret.yaml
+      - auth-policy.yaml
+      - filter-propagate-token.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

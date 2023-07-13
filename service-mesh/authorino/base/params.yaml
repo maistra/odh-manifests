@@ -1,0 +1,7 @@
+varReference:
+- path: spec/controlPlaneRef/name
+  kind: ServiceMeshMember
+  apiGroup: maistra.io/v1
+- path: spec/controlPlaneRef/namespace
+  kind: ServiceMeshMember
+  apiGroup: maistra.io/v1

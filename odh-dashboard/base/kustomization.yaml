@@ -3,28 +3,32 @@ kind: Kustomization
 commonLabels:
   app: odh-dashboard
   app.kubernetes.io/part-of: odh-dashboard
+
 resources:
-  - ../apps
-  - ../modelserving
-  - role.yaml
-  - cluster-role.yaml
-  - service-account.yaml
-  - role-binding.yaml
-  - cluster-role-binding.yaml
-  - auth-delegator.clusterrolebinding.yaml
-  - cluster-monitoring-role-binding.yaml
-  - deployment.yaml
-  - routes.yaml
-  - service.yaml
-  - oauth.secret.yaml
-  - fetch-builds-and-images.rbac.yaml
-  - image-puller.clusterrolebinding.yaml
-  - model-serving-role.yaml
-  - model-serving-role-binding.yaml
+- ../apps
+- ../modelserving
+- role.yaml
+- cluster-role.yaml
+- service-account.yaml
+- role-binding.yaml
+- cluster-role-binding.yaml
+- auth-delegator.clusterrolebinding.yaml
+- cluster-monitoring-role-binding.yaml
+- deployment.yaml
+- routes.yaml
+- service.yaml
+- oauth.secret.yaml
+- fetch-builds-and-images.rbac.yaml
+- image-puller.clusterrolebinding.yaml
+- model-serving-role.yaml
+- model-serving-role-binding.yaml
+
 images:
 - name: odh-dashboard
-  newName: quay.io/opendatahub/odh-dashboard
-  digest: sha256:4478d3830a30058fb87ed3e94dfdc615bf7517fddbd8490d6e2563263a0752fb
+  ## FIXME: Temporary until odh-dashboard PR is merged upstream
+  newName: quay.io/maistra-dev/odh-dashboard
+  newTag: ossm_annotations
 - name: oauth-proxy
   newName: registry.redhat.io/openshift4/ose-oauth-proxy
-  digest: sha256:ab112105ac37352a2a4916a39d6736f5db6ab4c29bad4467de8d613e80e9bb33
+  newTag: sha256:ab112105ac37352a2a4916a39d6736f5db6ab4c29bad4467de8d613e80e9bb33
+

@@ -1,0 +1,63 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: init-job-create
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - namespaces
+    verbs:
+      - create
+      - delete
+      - update
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - update
+      - patch
+  - apiGroups:
+      - networking.istio.io
+    resources:
+      - envoyfilters
+    verbs:
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - security.istio.io
+    resources:
+      - authorizationpolicies
+    verbs:
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - oauth.openshift.io 
+    resources:
+      - oauthclients
+    verbs:
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - maistra.io
+    resources:  
+      - servicemeshcontrolplanes
+    verbs:
+      - patch
+      - use
