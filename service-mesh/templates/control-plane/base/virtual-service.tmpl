@@ -11,6 +11,7 @@ spec:
   http:
   - match:
     - uri:
+        # match host.com/notebook/ns/username/logout 
         regex: "^/notebook/.*/.*/logout"
     route:
     - destination:
