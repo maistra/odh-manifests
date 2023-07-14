@@ -187,8 +187,8 @@ spec:
       name: notebook-images
   repos:
     - name: manifests
-      uri: https://github.com/maistra/odh-manifests/tarball/v0.0.4
-  version: v0.0.4
+      uri: https://github.com/maistra/odh-manifests/tarball/v0.0.5
+  version: v0.0.5
 EOF
 ```
 
