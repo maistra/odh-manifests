@@ -52,13 +52,14 @@ spec:
 EOF"    
 }
 ```
+
 You can use the function above to install all required operators:
 
 ```sh
 createSubscription "servicemeshoperator"
 # Temporarily, we use our custom operator build until operator changes are merged.
 # createSubscription "opendatahub-operator" "community-operators"
-operator-sdk run bundle quay.io/maistra-dev/opendatahub-operator-bundle:v0.0.4 --namespace openshift-operators --timeout 5m0s
+operator-sdk run bundle quay.io/maistra-dev/opendatahub-operator-bundle:v0.0.5 --namespace openshift-operators --timeout 5m0s
 createSubscription "authorino-operator" "community-operators" "alpha"
 ```
 
@@ -97,35 +98,6 @@ spec:
       enabled: false
 EOF
 
-
-> ⚠️
-> You have to configure Service Mesh Control Plane on your own.
-
-For example here's how you can configure minimal profile:
-
-```sh
-kubectl create ns istio-system
-kubectl apply -n istio-system -f -<<EOF
-apiVersion: maistra.io/v2
-kind: ServiceMeshControlPlane
-metadata:
-  name: minimal
-spec:
-  version: v2.3
-  tracing:
-    type: None
-  addons:
-    prometheus:
-      enabled: false
-    grafana:
-      enabled: false
-    jaeger:
-      name: jaeger
-    kiali:
-      name: kiali
-      enabled: false
-EOF
-```
 
 ## Setting up Open Data Hub Project
 
@@ -278,6 +250,7 @@ kubectl rollout restart deployment -n istio-system istio-ingressgateway
 ```
 
 ## Development tips
+
 ### Serving manifests locally
 
 #### Configure `CRC` to have acces to host network
