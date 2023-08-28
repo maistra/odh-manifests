@@ -81,7 +81,7 @@ kubectl apply -n istio-system -f -<<EOF
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: basic
+  name: minimal
 spec:
   version: v2.3
   tracing:
@@ -97,12 +97,11 @@ spec:
       name: kiali
       enabled: false
 EOF
-
+```
 
 ## Setting up Open Data Hub Project
 
 Create the Kubeflow Definition. The following commands will create a file called `odh-mesh.ign.yaml` [^1]:
-
 
 [^1] If you are wondering why `.ign.` - it can be used as global `.gitignore` pattern so you won't be able commit such files.
 
