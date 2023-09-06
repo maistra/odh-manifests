@@ -4,11 +4,6 @@ kind: Kustomization
 bases:
 - ../../base
 
-resources:
-- job-role.yaml
-- job-role-binding.yaml
-- dashboard-config.yaml
-
 patchesStrategicMerge:
 # when using bases:
 # - ../../base

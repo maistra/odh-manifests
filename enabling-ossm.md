@@ -1,6 +1,5 @@
 # Open Data Hub (ODH) Installation Guide with OpenShift Service Mesh (OSSM)
 
-
 This guide will walk you through the installation of Open Data Hub with OpenShift Service Mesh.
 
 ## Prerequisites
@@ -53,26 +52,25 @@ spec:
 EOF"    
 }
 ```
+
 You can use the function above to install all required operators:
 
 ```sh
-createSubscription "kiali-ossm"
-createSubscription "jaeger-product"
 createSubscription "servicemeshoperator"
+# Temporarily, we use our custom operator build until operator changes are merged.
 # createSubscription "opendatahub-operator" "community-operators"
-# temp, until operator changes are merged.
-operator-sdk run bundle quay.io/cgarriso/opendatahub-operator-bundle:dev-0.0.2 --namespace openshift-operators --timeout 5m0s
+operator-sdk run bundle quay.io/maistra-dev/opendatahub-operator-bundle:v0.0.5 --namespace openshift-operators --timeout 5m0s
 createSubscription "authorino-operator" "community-operators" "alpha"
 ```
 
 > **Warning**
 >
-> You may need to manually finalize the installation of the Authorino operator via the Installed Operators tab in the OpenShift Console.
+> You may need to manually update the installation of the Authorino operator via the Installed Operators tab in the OpenShift Console.
 
 
 > **Warning**
 >
-> Make sure to configure the Service Mesh Control Plane, as we are patching it.
+> Please ensure that the Service Mesh Control Plane is properly configured as we apply patches to it. It is assumed that the installation has already been done.
 
 
 For example, the following commands configure a slimmed-down profile:
@@ -113,61 +111,56 @@ cat <<'EOF' > odh-mesh.ign.yaml
 apiVersion: kfdef.apps.kubeflow.org/v1
 kind: KfDef
 metadata:
- name: odh-mesh
+  name: odh-mesh
 spec:
- applications:
- - kustomizeConfig:
-      parameters:
-        - name: namespace
-          value: istio-system
-      repoRef:
-        name: manifests
-        path: service-mesh/control-plane
-   name: control-plane
- - kustomizeConfig:
-      parameters:
-        - name: namespace
-          value: auth-provider
-      repoRef:
-        name: manifests
-        path: service-mesh/authorino
-   name: authorino  
- - kustomizeConfig:
-      overlays:
-        - service-mesh
-      repoRef:
-        name: manifests
-        path: odh-common
-   name: odh-common
- - kustomizeConfig:
-      overlays:
-        - service-mesh
-        - dev
-      repoRef:
-        name: manifests
-        path: odh-dashboard
-   name: odh-dashboard
- - kustomizeConfig:
-      overlays:
-        - service-mesh
-      repoRef:
-        name: manifests
-        path: odh-notebook-controller
-   name: odh-notebook-controller
- - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: odh-project-controller
-   name: odh-project-controller
- - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: notebook-images
-   name: notebook-images
- repos:
- - name: manifests
-   uri: https://github.com/maistra/odh-manifests/tarball/service-mesh-integration
- version: service-mesh-integration
+  plugins:
+    - kind: KfOssmPlugin
+      spec:
+        mesh:
+          name: minimal
+          namespace: istio-system
+          certificate:
+            generate: true
+        auth:
+          name: authorino
+          namespace: auth-provider
+          authorino:
+            label: authorino/topic=odh
+  applications:
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: odh-common
+      name: odh-common
+    - kustomizeConfig:
+        overlays:
+          - service-mesh
+          - dev
+        repoRef:
+          name: manifests
+          path: odh-dashboard
+      name: odh-dashboard
+    - kustomizeConfig:
+        overlays:
+          - service-mesh
+        repoRef:
+          name: manifests
+          path: odh-notebook-controller
+      name: odh-notebook-controller
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: odh-project-controller
+      name: odh-project-controller
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: notebook-images
+      name: notebook-images
+  repos:
+    - name: manifests
+      uri: https://github.com/maistra/odh-manifests/tarball/v0.0.5
+  version: v0.0.5
 EOF
 ```
 
@@ -223,7 +216,7 @@ export ODH_ROUTE=$(kubectl get route --all-namespaces -l maistra.io/gateway-name
 xdg-open https://$ODH_ROUTE > /dev/null 2>&1 &    
 ```
 
-## Troubleshooting and Tips
+## Troubleshooting
 
 If you encounter issues while trying to access the web app, follow the steps below to troubleshoot.
 
@@ -240,21 +233,24 @@ This can reveal errors like:
 * Wrong redirect URL
 * Mismatching secret between what OAuth client has defined and what is loaded for Envoy Filters.
 
-If the latter is the case (i.e., an error like `E0328 18:39:56.277217 1 access.go:177] osin: error=unauthorized_client, internal_error=<nil> get_client=client check failed, client_id=odh`)`, check if the token is the same everywhere by comparing the output of the following commands:
+If the latter is the case (i.e., an error like `E0328 18:39:56.277217 1 access.go:177] osin: error=unauthorized_client, internal_error=<nil> get_client=client check failed, client_id=${ODH_NS}-oauth2-client`)`, check if the token is the same everywhere by comparing the output of the following commands:
 
 
 ```sh
-kubectl get oauthclient.oauth.openshift.io odh
-kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- cat /etc/istio/odh-oauth2/token-secret.yaml
-kubectl get secret istio-odh-oauth2 -n istio-system -o yaml
+kubectl get oauthclient.oauth.openshift.io ${ODH_NS}-oauth2-client
+kubectl exec $(kubectl get pods -n istio-system -l app=istio-ingressgateway  -o jsonpath='{.items[*].metadata.name}') -n istio-system -c istio-proxy -- cat /etc/istio/${ODH_NS}-oauth2-tokens/token-secret.yaml
+kubectl get secret ${ODH_NS}-oauth2-tokens -n istio-system -o yaml
 ```
-To read the actual value of secrets you could use a [`kubectl` plugin](https://github.com/elsesiy/kubectl-view-secret) instead. Then the last line would look as follows `kubectl view-secret istio-odh-oauth2 -n istio-system -a`.
+To read the actual value of secrets you could use a [`kubectl` plugin](https://github.com/elsesiy/kubectl-view-secret) instead. Then the last line would look as follows `kubectl view-secret ${ODH_NS}-oauth2-tokens -n istio-system -a`.
 
 The `i`stio-ingressgateway` pod might be out of sync (and so `EnvoyFilter` responsible for OAuth2 flow). Check its logs and consider restarting it:
 
 ```sh
 kubectl rollout restart deployment -n istio-system istio-ingressgateway  
 ```
+
+## Development tips
+
 ### Serving manifests locally
 
 #### Configure `CRC` to have acces to host network
