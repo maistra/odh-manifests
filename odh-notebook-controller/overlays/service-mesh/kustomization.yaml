@@ -6,9 +6,8 @@ bases:
 configMapGenerator:
 - name: config
   behavior: merge
-  literals:
-  - USE_ISTIO=true
-  - ISTIO_GATEWAY=opendatahub/odh-gateway # TODO set by the ossm plugin
+  envs:
+  - ossm.env
 
 # needs to be `patchesJson6902`, `patches` seems to be ignored
 # also: inline patches do not work, operator complains about overlays/service-mesh being
