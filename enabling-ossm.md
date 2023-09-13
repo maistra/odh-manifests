@@ -83,7 +83,7 @@ kind: ServiceMeshControlPlane
 metadata:
   name: minimal
 spec:
-  version: v2.3
+  version: v2.4
   tracing:
     type: None
   addons:
@@ -134,15 +134,12 @@ spec:
       name: odh-common
     - kustomizeConfig:
         overlays:
-          - service-mesh
           - dev
         repoRef:
           name: manifests
           path: odh-dashboard
       name: odh-dashboard
     - kustomizeConfig:
-        overlays:
-          - service-mesh
         repoRef:
           name: manifests
           path: odh-notebook-controller
@@ -159,8 +156,8 @@ spec:
       name: notebook-images
   repos:
     - name: manifests
-      uri: https://github.com/maistra/odh-manifests/tarball/v0.0.5
-  version: v0.0.5
+      uri: https://github.com/maistra/odh-manifests/tarball/kf_ossm_plugin
+  version: kf_ossm_plugin
 EOF
 ```
 
