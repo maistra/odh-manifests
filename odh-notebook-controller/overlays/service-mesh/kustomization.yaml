@@ -19,4 +19,9 @@ patchesJson6902:
     version: v1
     kind: ClusterRole
     name: manager-role
-    
+
+## FIXME: Temporary until odh-dashboard PR is merged upstream
+images:
+- name: quay.io/opendatahub/odh-notebook-controller
+  newName: quay.io/maistra-dev/odh-notebook-controller
+  newTag: service-mesh-integration

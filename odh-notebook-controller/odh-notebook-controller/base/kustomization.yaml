@@ -4,6 +4,5 @@ resources:
   - ../default
 images:
   - name: quay.io/opendatahub/odh-notebook-controller
-    ## FIXME: Temporary until PR is merged upstream
-    newName: quay.io/maistra-dev/odh-notebook-controller
-    newTag: service-mesh-integration
+    newName: quay.io/opendatahub/odh-notebook-controller
+    newTag: v1.7.0-2
