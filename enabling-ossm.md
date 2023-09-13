@@ -81,7 +81,7 @@ kubectl apply -n istio-system -f -<<EOF
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: basic
+  name: minimal
 spec:
   version: v2.3
   tracing:
@@ -97,7 +97,7 @@ spec:
       name: kiali
       enabled: false
 EOF
-
+```
 
 ## Setting up Open Data Hub Project
 
